@@ -27,9 +27,9 @@ pub fn std_vars() -> Vec<Vec<String>>{
 fn main() {
     let frog = include_str!("sexy frog.txt");
     let help = include_str!("help info.txt");
-    let mut infile = "input.txt".to_string();    
-    let mut outfile = "out.md".to_string();
-    let mut format = "text".to_string();
+    let mut infile = "".to_string();    
+    let mut outfile = "out.html".to_string();
+    let mut format = "HTML".to_string();
     let args: Vec<_> = env::args().collect();
     
     let mut x = 1;
