@@ -58,6 +58,10 @@ pub fn format_parser(input: &String) -> String{
                 output+="}";  
                 pos+=2;
             }
+            else if chars[pos+1] == '#'{ 
+                output+="#";  
+                pos+=2;
+            }
             else{
                 output+="\\";
                 pos+=1;
@@ -148,6 +152,23 @@ pub fn format_parser(input: &String) -> String{
             }
 
 
+        }
+        else if chars[pos] == '#'{
+            let mut action = String::new();
+            let mut argument = String::new();
+            pos+=1;
+            while pos < chars.len() && chars[pos] != ' ' && chars[pos] != '\n'{
+                action+=&chars[pos].to_string();
+                pos+=1;
+            }
+            while pos < chars.len() && chars[pos] != '\n'{ 
+                argument+=&chars[pos].to_string();
+                pos+=1;
+            }
+            if action == "section"{
+                output+=&("\\SECTION\\".to_string() + &(argument + "\\ENDSECTION\\"));
+            }
+            pos+=1;
         }
         else if chars[pos] == '\t' && (pos < 1 || chars[pos-1] == '\n'){
             if is_paragraph{
@@ -296,6 +317,12 @@ pub fn HTML_parser(text: &String, output_file: &String, info: docinfo){
                 }
                 else if action == "ENDLINK"{
                     output+="</a>";
+                }
+                else if action == "SECTION"{
+                    output+="<h2>";
+                }
+                else if action == "ENDSECTION"{
+                    output+="</h2>";
                 }
             }
             

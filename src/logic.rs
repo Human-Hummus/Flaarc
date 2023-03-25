@@ -66,7 +66,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 pos+=2;
             }
             else if chars[pos+1] == '#'{ 
-                output+="#";
+                output+="\\#";
                 pos+=2;
             }
             else if chars[pos+1] == '{'{ 
@@ -155,6 +155,10 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
             else if todo == "setfont"{
                 docinf.font = run_on;
             }
+            else if todo == "section"{
+                output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
+            }
+            
             else{
                 error::error("incomplete hash");
             }
@@ -220,6 +224,10 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 output+=&parsed_exec.0;
                 
             }
+        }
+        else if chars[pos] == '#'{
+            output+="\\#";
+            pos+=1;
         }
         else{
             output+=&chars[pos].to_string();

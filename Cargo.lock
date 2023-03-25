@@ -111,7 +111,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "fm"
+name = "flaarc"
 version = "0.1.0"
 dependencies = [
  "chrono",
