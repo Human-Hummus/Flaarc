@@ -1,0 +1,24 @@
+flaarc -> (F)unctional (La)tex-like M(ar)down Replacement* With Some Features From (C).
+
+
+Basic command line options:
+	-f {format}		Set the format to {format}, defaults to markdown.
+	--format {format}	Set the format to {format}, defaults to markdown.
+	-i {file}		Set the input file to {file}
+	--input {file}		Set the input file to {file}
+	-o {file}		Set the output file to {file}, defaults to out.md.
+	--output {file}		Set the output file to {file}, defaults to out.md.
+	-h			Print this screen.
+	--help			Print this screen.
+	frog			Don't worry about it.
+
+Output formats:
+_______________________________________________________________________________________________________________________________________________________________________________________
+	Format				Name(-f)	Status			Notes
+_______________________________________________________________________________________________________________________________________________________________________________________
+	HTML 				HTML		(Complete)		Images will be copied to the directory the file is outputted to, if any are specified.
+	Markdown			markdown 	(Complete)		No images.
+	internal representation		IR		(Complete)		It's VERY primitive, and probably useless, unless you're bored, or want to write a program to use it.
+	Plain Text			text		(Complete)		It's just plain text, and it's got all the limitations you'd think.
+
+Thank you for using Flaarc! I hope you find this project entertaining.
