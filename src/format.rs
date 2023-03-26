@@ -119,12 +119,14 @@ pub fn format_parser(input: &String) -> String{
                 if new_item_follows{
                     output+="\\STARTLISTITEM\\";
                 }
+
                 pos+=1;
             }
 
             else{
-                if pos < 1 || chars[pos-1] == '\n'{if is_paragraph{is_paragraph=false;output+="\\ENDPARAGRAPH\\"}}
-
+                if pos > 0 && chars[pos-1] == '\n' && is_paragraph{
+                    is_paragraph=false;output+="\\ENDPARAGRAPH\\";println!("p");
+                }
                 else{output+="\n";}
                 pos+=1;
             }
@@ -178,7 +180,7 @@ pub fn format_parser(input: &String) -> String{
 
 
 pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
-    let mut output = "% ".to_string() + &info.title;
+    let mut output = "# ".to_string() + &info.title;
     let mut pos = 0;
     let chars:Vec<char> = text.chars().collect();
     let mut current_link = String::new();
@@ -224,7 +226,7 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
                 else if action == "ENDLISTITEM"{
                     //do nothing.
                 }
-                else if action == "STARTPARAGRAPH"{
+                else if action == "BEGINPARAGRAPH"{
                     output+="\n\t";
                 }
                 else if action == "ENDPARAGRAPH"{
@@ -251,9 +253,6 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
                     println!("failed action: {}", action);
                 }
 
-                
-
-
             }
         }
         else if chars[pos] == '_'{
@@ -263,6 +262,10 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
         else if chars[pos] == '*'{
             pos+=1;
             output+="\\*";
+        }
+        else if chars[pos] == '#'{
+            pos+=1;
+            output+="\\#";
         }
         else if chars[pos] == '\n' && list_depth > 1{
             output+="\n";

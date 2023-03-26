@@ -136,6 +136,9 @@ fn main() {
     else if format == "text"{
         format::text_parser(&format_parser_output, &outfile, logical_parser_output.2);
     }
+    else if format == "logic"{
+        fs::write(outfile, logical_parser_output.0);
+    }
     else{
         println!("error: unknown format");
         std::process::exit(1);
