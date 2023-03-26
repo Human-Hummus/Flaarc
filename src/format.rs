@@ -226,7 +226,7 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
                 else if action == "ENDLISTITEM"{
                     //do nothing.
                 }
-                else if action == "BEGINPARAGRAPH"{
+                else if action == "STARTPARAGRAPH"{
                     output+="\n\t";
                 }
                 else if action == "ENDPARAGRAPH"{
@@ -378,6 +378,7 @@ pub fn text_parser(text: &String, output_file: &String, info: docinfo){
     output+="___________________________________________";
     let chars:Vec<char> = text.chars().collect();
     let mut pos = 0;
+    let mut indents = 0;
 
     while pos < chars.len(){
         if chars[pos] == '\\'{
@@ -405,6 +406,48 @@ pub fn text_parser(text: &String, output_file: &String, info: docinfo){
                 else if action == "ENDITALIC"{
                     output+="//";
                 }
+                else if action == "STARTLIST"{
+                    indents+=1;
+                }
+                else if action == "ENDLIST"{
+                    indents-=1;
+                }
+                else if action == "STARTLISTITEM"{
+                    let mut indents_done = 0;
+                    while (indents_done < indents){
+                        output+="\t";
+                        indents_done+=1;
+                    }
+                    output+="> ";
+                }
+                else if action == "ENDLISTITEM"{
+                    output+="\n";
+                }
+                else if action == "STARTPARAGRAPH"{
+                    output+="\n\t";
+                }
+                else if action == "ENDPARAGRAPH"{
+                    output+="\n";
+                }
+                else if action == "STARTLINK"{
+                    let mut link = String::new();
+                    while chars[pos] != '\\'{
+                        link +=&chars[pos].to_string();
+                        pos+=1;
+                    }
+                    pos+=1;
+                    output+=&("(LINK: \"".to_string() + &(link + "\" Text: "));
+                }
+                else if action == "EMDLINK"{
+                    output+=")";
+                }
+                else if action == "SECTION"{
+                    output+="=========================\n";
+                }
+                else if action == "ENDSECTION"{
+                    output+="\n=========================\n";
+                }
+
             }
             
         }

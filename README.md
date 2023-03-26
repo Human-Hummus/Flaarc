@@ -6,6 +6,16 @@ resembles normal text as little as possible, that way when you don't need the fe
 you do, they're fairly easy to use. Does this mean you should use it? Probably not, at least not yet. As it is
 *very* much **alpha quality**, I wouldn't recommend it for anything remotely serious. As a fun thing to try? Sure.
 
+##  Using It From The CLI
+The basic syntax is as follows:
+(path to flaarc bin) -i (input file) -f (format) -o (output file)
+
+Please note that while the format and output files aren't required, as they default to "markdown" and "out.md" respectively, the input file **is** required.
+
+Some other options include:
+- -help / -h:	print help info- 
+	frog:		Don't worry about it.
+
 ##  Italics & Bold.
 Italics can be defined with the text intended to be itallicized surounded by "//".
 For example, "//italic text//" makes "*italic text*"
