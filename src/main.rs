@@ -77,8 +77,8 @@ fn main() {
     let frog = include_str!("sexy frog.txt");
     let help = include_str!("help info.txt");
     let mut infile = "".to_string();    
-    let mut outfile = "out.html".to_string();
-    let mut format = "HTML".to_string();
+    let mut outfile = "out.md".to_string();
+    let mut format = "markdown".to_string();
     let args: Vec<_> = env::args().collect();
     
     let mut x = 1;
@@ -128,10 +128,10 @@ fn main() {
         format::markdown_parser(&format_parser_output, &outfile, logical_parser_output.2);
     }
     else if format == "IR"{
-        fs::write(outfile, format_parser_output + &("\n::::::::::\nTITLE:".to_owned() + &logical_parser_output.2.title));
+        fs::write(outfile, format_parser_output + &("\n::::::::::\nTITLE:".to_owned() + &logical_parser_output.2.title)).expect("File system error.");
     }
-    else if format == "HTML"{
-        format::HTML_parser(&format_parser_output, &outfile, logical_parser_output.2);
+    else if format == "HTML" || format == "html"{
+        format::html_parser(&format_parser_output, &outfile, logical_parser_output.2);
     }
     else if format == "text"{
         format::text_parser(&format_parser_output, &outfile, logical_parser_output.2);

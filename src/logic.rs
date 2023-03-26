@@ -160,7 +160,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
             }
             
             else{
-                error::error("incomplete hash");
+                error::error("incomplete hash, logic");
             }
             pos+=1;
         }

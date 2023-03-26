@@ -1,6 +1,18 @@
 use std::fs;
 use crate::docinfo;
 
+macro_rules! flip_bool{
+    ($bol:expr) => {
+        if $bol == true{
+            $bol = false;
+        }
+        else{
+            $bol = true;
+        }
+    }
+}
+
+
 //parses the... format; generate IR in order to make it easier to parse later to generate HTML, md, etc.
 pub fn format_parser(input: &String) -> String{
     let mut output = String::new();
@@ -8,168 +20,133 @@ pub fn format_parser(input: &String) -> String{
     let mut pos = 0;
     
     let mut depthinfo:Vec<char> = vec![];
-    
     let mut is_bold = false;
     let mut is_italic = false;
     let mut is_paragraph = false;
-    let mut is_link = false;
 
     while pos < chars.len(){
         if chars[pos] == '_'  && pos < chars.len()-1 && chars[pos+1] == '_'{
-            if is_bold{
-                output+="\\ENDBOLD\\";
-                is_bold = false;
+            match is_bold{
+                true => { output+="\\ENDBOLD\\"; }
+                false => { output+="\\STARTBOLD\\"; }
             }
-            else{
-                output+="\\STARTBOLD\\";
-                is_bold = true;
-            }
+            flip_bool!(is_bold);
             pos+=2;
         }
         else if chars[pos] == '/' &&  pos < chars.len()-1 && chars[pos+1] == '/'{
-            if is_italic{
-                output+="\\ENDITALIC\\";
-                is_italic = false;
+            match is_italic{
+                true => { output+="\\ENDITALIC\\"; }
+                false => { output+="\\STARTITALIC\\"; }
             }
-            else{
-                output+="\\STARTITALIC\\";
-                is_italic = true;
-            }
+            flip_bool!(is_italic);
             pos+=2;
         }
         else if chars[pos] == '\\'{
-            if chars[pos+1] == '\\'{
-                output+="\\\\";
-                pos+=2;
-            }
-            else if chars[pos+1] == '{'{ 
-                output+="{";
-                pos+=2;
-            }
-            else if chars[pos+1] == '_'{             
-                output+="_"; 
-                pos+=2;
-            }
-            else if chars[pos+1] == '/'{             
-                output+="/"; 
-                pos+=2;
-            }
-            else if chars[pos+1] == '}'{ 
-                output+="}";  
-                pos+=2;
-            }
-            else if chars[pos+1] == '#'{ 
-                output+="#";  
-                pos+=2;
-            }
-            else{
-                output+="\\";
-                pos+=1;
+            match chars[pos+1]{
+                '\\' => { output+="\\\\"; pos+=2; }
+                '{' => { output+="{"; pos+=2; }
+                '_' => { output+="_"; pos+=2; }
+                '/' => { output+="/"; pos+=2; }
+                '}' => { output+="}"; pos+=2; }
+                '#' => { output+="#";  pos+=2; }
+                _ => { output+="\\"; pos+=1; }
             }
         }
 
         else if chars[pos] == '{'{
             pos+=1;
             let mut command:String = String::new();
-            while chars[pos] != ':'{
-                command+=&chars[pos].to_string();
-                pos+=1;
-            }
+            while chars[pos] != ':'{ command+=&chars[pos].to_string(); pos+=1; }
             pos+=1;
-            while chars[pos] == ' ' || chars[pos] == '\n' || chars[pos] == '\t'{
-                pos+=1;
-            }
+            while chars[pos] == ' ' || chars[pos] == '\n' || chars[pos] == '\t'{ pos+=1; }
+            
             if command == "list"{
-                println!("list");
-                output+="\\STARTLIST\\";
-                let mut new_item = false;
-                let mut tmp = pos+1;
-                while chars[tmp] != '}' && chars[pos] != '\n'{
-                    if chars[tmp] != ' ' && chars[tmp] != '\n' && chars[tmp] != '\t'{
-                        new_item = true;
-                        break;
+                    output+="\\STARTLIST\\";
+                    let mut new_item_follows = false;
+                    let mut x = pos+1;
+                    while chars[x] != '}' && chars[x] != '\n'{
+                        if chars[x] != ' ' && chars[x] != '\n' && chars[x] != '\t'{ new_item_follows = true; break; }
+                        x+=1;
                     }
-                    tmp+=1;
+
+                    if new_item_follows { output+="\\STARTLISTITEM\\"; }
+                    //l is for link
+                    depthinfo.push('l');
+                    pos+=1;
+            }
+
+
+            else if command == "link"{
+                let mut link_address = String::new();
+                while chars[pos] != '|' && chars[pos] != '}'{
+                  link_address+=&chars[pos].to_string();
+                    pos+=1;
                 }
-                if new_item{
-                    output+="\\STARTLISTITEM\\";
-                }
-                depthinfo.push('l');
+                output+=&("\\STARTLINK:".to_owned() + &(link_address.clone() + "\\"));
+        
+                //U is for Url.
+                if chars[pos] != '}'{ depthinfo.push('u'); }
+                else{ output+=&(link_address + "\\ENDLINK\\"); }
                 pos+=1;
             }
-            else if command == "link"{
-                let mut linkto = String::new();
-                while (chars[pos] != '|' && chars[pos] != '}'){
-                    linkto+=&chars[pos].to_string();
-                    pos+=1;
-                }
-                output+=&("\\STARTLINK:".to_owned() + &(linkto.clone() + "\\"));
-                //U for Url.
-                if chars[pos] != '}'{
-                    depthinfo.push('u');
-                    pos+=1;
-                }
-                else{
-                    output+=&linkto;
-                    output+="\\ENDLINK\\";
-                    pos+=1;
-                }
-            }
+
+            else{ pos+=1; } //oof
+
+
         }
         else if chars[pos] == '}'{
             let terminated:char = depthinfo.pop().unwrap();
-            if terminated == 'l'{
+            if terminated == 'l'{ //l is for (l)ist
                 output+="\\ENDLIST\\";
             }
-            if terminated == 'u'{
+            if terminated == 'u'{ //u is for (u)rl
                 output+="\\ENDLINK\\";
-            }
+            } 
             pos+=1;
         }
         else if chars[pos] == '\n'{
             if depthinfo.contains(&'l'){
                 output+="\\ENDLISTITEM\\";
-                let mut new_item = false;
-                let mut tmp = pos+1;
-                while chars[tmp] != '}'{
-                    if chars[tmp] != ' ' && chars[tmp] != '\n' && chars[tmp] != '\t'{
-                        new_item = true;
+                let mut new_item_follows = false;
+                let mut temp_pos = pos+1;
+                while chars[temp_pos] != '}'{
+                    if chars[temp_pos] != ' ' && chars[temp_pos] != '\n' && chars[temp_pos] != '\t'{
+                        new_item_follows = true;
                         break;
                     }
-                    tmp+=1;
+                    temp_pos+=1;
                 }
-                if new_item{
+                if new_item_follows{
                     output+="\\STARTLISTITEM\\";
                 }
-
                 pos+=1;
             }
+
             else{
                 if pos < 1 || chars[pos-1] == '\n'{if is_paragraph{is_paragraph=false;output+="\\ENDPARAGRAPH\\"}}
 
                 else{output+="\n";}
                 pos+=1;
             }
-
-
         }
+
         else if chars[pos] == '#'{
             let mut action = String::new();
             let mut argument = String::new();
             pos+=1;
+
             while pos < chars.len() && chars[pos] != ' ' && chars[pos] != '\n'{
-                action+=&chars[pos].to_string();
-                pos+=1;
+                action+=&chars[pos].to_string(); pos+=1;
             }
             while pos < chars.len() && chars[pos] != '\n'{ 
-                argument+=&chars[pos].to_string();
-                pos+=1;
+                argument+=&chars[pos].to_string(); pos+=1;
             }
             if action == "section"{
                 output+=&("\\SECTION\\".to_string() + &(argument + "\\ENDSECTION\\"));
             }
             pos+=1;
         }
+
         else if chars[pos] == '\t' && (pos < 1 || chars[pos-1] == '\n'){
             if is_paragraph{
                 output+="\\ENDPARAGRAPH\\"
@@ -189,7 +166,10 @@ pub fn format_parser(input: &String) -> String{
         output+="\\ENDPARAGRAPH\\";
     }
     if is_bold{
-        output+="\\ENDBOLD\\"
+        output+="\\ENDBOLD\\";
+    }
+    if is_italic{
+        output+="\\ENDITALIC\\";
     }
     return output;
 }
@@ -198,55 +178,103 @@ pub fn format_parser(input: &String) -> String{
 
 
 pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
-    let mut output = String::new();
-    output+=&("%".to_owned() + &(info.title.to_owned() + "\n"));
-    let chars:Vec<char> = text.chars().collect();
+    let mut output = "% ".to_string() + &info.title;
     let mut pos = 0;
-
-    while pos < chars.len(){
+    let chars:Vec<char> = text.chars().collect();
+    let mut current_link = String::new();
+    let mut list_depth = 0;
+    
+    while pos < chars.len() {
+        //println!("{}, {}", chars[pos], pos);
         if chars[pos] == '\\'{
             if chars[pos+1] == '\\'{
-                output+="\\";
-                pos+=2;
+                output+="\\\\";
+                pos+=2
             }
             else{
-                pos+=1;
                 let mut action = String::new();
-                while chars[pos] != '\\'{
+                pos+=1;
+                while pos < chars.len() && chars[pos] != '\\' && chars[pos] != ':'{
                     action+=&chars[pos].to_string();
                     pos+=1;
                 }
+                println!("action: {}", action);
                 pos+=1;
-                if action == "STARTBOLD" || action == "ENDBOLD"{
-                    output+="**";
+                if action == "STARTBOLD"{
+                    output+="**"
                 }
-                else if action == "STARTITALIC" || action == "ENDITALIC"{
-                    output+="*";
+                else if action == "ENDBOLD"{
+                    output+="**"
                 }
+                else if action == "STARTITALIC"{ 
+                    output+="*"
+                }
+                else if action == "ENDITALIC"{ 
+                    output+="*"
+                }
+                else if action == "STARTLIST"{ 
+                    list_depth+=1;
+                }
+                else if action == "ENDLIST"{ 
+                    list_depth-=1;
+                }
+                else if action == "STARTLISTITEM"{
+                    output +="- ";
+                }
+                else if action == "ENDLISTITEM"{
+                    //do nothing.
+                }
+                else if action == "STARTPARAGRAPH"{
+                    output+="\n\t";
+                }
+                else if action == "ENDPARAGRAPH"{
+                    //do nothing
+                }
+                else if action == "STARTLINK"{
+                    current_link = String::new();
+                    while chars[pos] != '\\'{
+                        current_link+=&chars[pos].to_string();pos+=1;
+                    }
+                    pos+=1;
+                    output+="[";
+                }
+                else if action == "ENDLINK"{
+                    output+=&("](".to_owned() + &(current_link.clone() + ")"));
+                }
+                else if action == "SECTION"{
+                    output+="## ";
+                }
+                else if action == "ENDSECTION"{
+                    output+="\n";
+                }
+                else {
+                    println!("failed action: {}", action);
+                }
+
+                
+
+
             }
-            
+        }
+        else if chars[pos] == '_'{
+            pos+=1;
+            output+="\\_";
         }
         else if chars[pos] == '*'{
+            pos+=1;
             output+="\\*";
-            pos+=1;
         }
-        else if chars[pos] == '_'{ 
-            output+="\\_";
-            pos+=1;
-        }
-        else if chars[pos] == '='{ 
-            output+="\\=";
-            pos+=1;
-        }
-        else if chars[pos] == '-'{ 
-            output+="\\-";
+        else if chars[pos] == '\n' && list_depth > 1{
+            output+="\n";
+            for i in 1..list_depth{
+                output+="\t";
+            }
             pos+=1;
         }
         else{
-            output+=&chars[pos].to_string();
+            output += &chars[pos].to_string();
             pos+=1;
         }
-        
 
     }
 
@@ -254,7 +282,7 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
 }
 
 
-pub fn HTML_parser(text: &String, output_file: &String, info: docinfo){
+pub fn html_parser(text: &String, output_file: &String, info: docinfo){
     let mut output = "<!DOCTYPE html><html>".to_string();
     output+=&("<head><title>".to_owned() + &(info.title.clone() + "</title></head>"));
     output += &("<body><h1>".to_owned() + &(info.title + "</h1>"));
@@ -327,10 +355,6 @@ pub fn HTML_parser(text: &String, output_file: &String, info: docinfo){
             }
             
         }
-        //else if chars[pos] == '*'{
-        //    output+="\\*";
-        //    pos+=1;
-        //}
         else if chars[pos] == '\n'{ 
             output+="<br>";
             pos+=1;
