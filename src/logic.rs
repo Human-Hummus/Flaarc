@@ -39,6 +39,7 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
 
 //run a function.
 fn exec_fn(function: &String, text: &String) -> String{
+    println!("fn name: {}", function);
     let returned:String = String::from_utf8_lossy(&Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().expect("nonexistent function").stdout).to_string();
     return returned;
 }
