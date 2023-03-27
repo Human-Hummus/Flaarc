@@ -63,7 +63,7 @@ pub fn format_parser(input: &String) -> String{
             if command == "list"{
                     output+="\\STARTLIST\\";
                     let mut new_item_follows = false;
-                    let mut x = pos+1;
+                    let mut x = pos;
                     while chars[x] != '}' && chars[x] != '\n'{
                         if chars[x] != ' ' && chars[x] != '\n' && chars[x] != '\t'{ new_item_follows = true; break; }
                         x+=1;
@@ -72,7 +72,6 @@ pub fn format_parser(input: &String) -> String{
                     if new_item_follows { output+="\\STARTLISTITEM\\"; }
                     //l is for link
                     depthinfo.push('l');
-                    pos+=1;
             }
 
 
