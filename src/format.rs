@@ -145,6 +145,9 @@ pub fn format_parser(input: &String) -> String{
             if action == "section"{
                 output+=&("\\SECTION\\".to_string() + &(argument + "\\ENDSECTION\\"));
             }
+            else if action == "image"{
+                output+=&("\\STARTIMAGE\\".to_string() + &(argument + "\\ENDIMAGE\\"));
+            }
             pos+=1;
         }
 
@@ -252,6 +255,12 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
                 else if action == "ENDSECTION"{
                     output+="\n";
                 }
+                else if action == "STARTIMAGE"{
+                    output+="![image](";
+                }
+                else if action == "ENDIMAGE"{
+                    output+=")";
+                }
                 else {
                     println!("failed action: {}", action);
                 }
@@ -358,6 +367,12 @@ pub fn html_parser(text: &String, output_file: &String, info: docinfo){
                 }
                 else if action == "ENDSECTION"{
                     output+="</h2>";
+                }
+                else if action == "STARTIMAGE"{
+                    output+="<img src=\"";
+                }
+                else if action == "ENDIMAGE"{
+                    output+="\">"
                 }
             }
             

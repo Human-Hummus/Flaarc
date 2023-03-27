@@ -35,9 +35,14 @@ Hashes are lines that begin with the '\#' symbol. There are a few types of hashe
 
 
 \#\#: this is a note, a line that starts with two hashes **and a space** will be discarded by the Flaarc parser.
+
 \#section {name}: make a section, this means make a \<h2\> tag in the emmitted HTML.
+
 \#title {title}: set the title, this will be the title of the webpage and will be printed at the top, defaults to: "title". Creative, I know.
+
 \#setfont {font} set the font.
+
+\#image {path\_to\_image}, include image in document.
 
 to type a \# on its own, ensure it's preceded by a backslash, like this: \\\#.
 
@@ -56,13 +61,17 @@ There are reserved functions:
 - The list function makes lists.
 - The link function makes links.
 
+
 ##  Thank you.
-I want to say, thank you for showing interest in this hobby project, it's been fun for me, and I hope you'll have fun too.
+I want to say thank you for showing interest in this hobby project. It's been fun for me, and I hope you'll have fun too.
+
 
 
 ##  Features I want to add:
 
-- image support.
+- web image support.
 - standard library of functions.
 - an optional GUI.
 - better error messages.
+- highlight support.
+- table support.
