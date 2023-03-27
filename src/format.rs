@@ -221,13 +221,17 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
                     list_depth-=1;
                 }
                 else if action == "STARTLISTITEM"{
+                    output+="\n";
+                    for _ in 1..list_depth{
+                        output+="\t";
+                    }
                     output +="- ";
                 }
                 else if action == "ENDLISTITEM"{
                     //do nothing.
                 }
                 else if action == "STARTPARAGRAPH"{
-                    output+="\n\t";
+                    output+="";
                 }
                 else if action == "ENDPARAGRAPH"{
                     //do nothing
@@ -266,13 +270,6 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
         else if chars[pos] == '#'{
             pos+=1;
             output+="\\#";
-        }
-        else if chars[pos] == '\n' && list_depth > 1{
-            output+="\n";
-            for i in 1..list_depth{
-                output+="\t";
-            }
-            pos+=1;
         }
         else if chars[pos] == '<'{
             output+="\\<";

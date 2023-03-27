@@ -14,8 +14,9 @@ The basic syntax is as follows:
 Please note that while the format and output files aren't required, as they default to "markdown" and "out.md" respectively, the input file **is** required.
 
 Some other options include:
-- -help / -h:	print help info- 
-	frog:		Don't worry about it.
+
+- -help / -h:	print help info
+- frog:		Don't worry about it.
 
 
 ##  Italics & Bold.
@@ -43,7 +44,8 @@ to type a \# on it's own, ensure it's preceded by a backslash, like this: \\\#.
 
 
 ##  Features I want to add:
-- mage support.- 
-	standard library of functions.- 
-	an optional GUI.- 
-	better error messages.
+
+- mage support.
+- standard library of functions.
+- an optional GUI.
+- better error messages.
