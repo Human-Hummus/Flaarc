@@ -1,5 +1,5 @@
 use std::fs;
-use crate::docinfo;
+use crate::DocInfo;
 
 macro_rules! flip_bool{
     ($bol:expr) => {
@@ -181,7 +181,7 @@ pub fn format_parser(input: &String) -> String{
 
 
 
-pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
+pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
     let mut output = "# ".to_string() + &info.title;
     let mut pos = 0;
     let chars:Vec<char> = text.chars().collect();
@@ -297,7 +297,7 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
 }
 
 
-pub fn html_parser(text: &String, output_file: &String, info: docinfo){
+pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
     let mut output = "<!DOCTYPE html><html>".to_string();
     output+=&("<head><title>".to_owned() + &(info.title.clone() + "</title></head>"));
     output += &("<body><h1>".to_owned() + &(info.title + "</h1>"));
@@ -390,7 +390,7 @@ pub fn html_parser(text: &String, output_file: &String, info: docinfo){
     fs::write(output_file, output).expect("error writing file");
 }
 
-pub fn text_parser(text: &String, output_file: &String, info: docinfo){
+pub fn text_parser(text: &String, output_file: &String, info: DocInfo){
     let mut output = "".to_string();
     output+=&info.title;
     output+="___________________________________________";
@@ -432,7 +432,7 @@ pub fn text_parser(text: &String, output_file: &String, info: docinfo){
                 }
                 else if action == "STARTLISTITEM"{
                     let mut indents_done = 0;
-                    while (indents_done < indents){
+                    while indents_done < indents{
                         output+="\t";
                         indents_done+=1;
                     }

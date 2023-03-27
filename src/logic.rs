@@ -1,10 +1,10 @@
 use std::fs;
 use std::process::Command;
-use crate::docinfo;
+use crate::DocInfo;
 
 
 pub fn read_file(filename:&String) -> String{
-    let data = fs::read_to_string(filename).unwrap_or_else(|error|{
+    let data = fs::read_to_string(filename).unwrap_or_else(|_error|{
         println!("Warning: unable to read file with name \"{}\"", filename);
         return "\nFILE SYSTEM ERROR\n".to_string();
     });
@@ -29,7 +29,7 @@ fn lines_to_pos(vc: &Vec<char>, pos: usize) -> i32{
 fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, usize){
     pos+=1;
     let chars:Vec<char> = text.chars().collect();
-    let mut output = String::new();
+    let output;
     let mut var_name = String::new();
     while pos < chars.len() && chars[pos] != '\n' && chars[pos] != ' ' && chars[pos] != '\t'{
         var_name+=&chars[pos].to_string();
@@ -78,8 +78,8 @@ fn exec_fn(function: &String, text: &String) -> String{
 //
 // Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does
 // formatting.
-pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<Vec<String>>, docinfo){
-    let mut docinf = docinfo {title: "Title".to_string(), font: "times".to_string()};
+pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<Vec<String>>, DocInfo){
+    let mut docinf = DocInfo {title: "Title".to_string(), font: "times".to_string()};
     let chars:Vec<char> = text.chars().collect();
     let mut output = String::new();
     let mut pos = 0;

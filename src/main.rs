@@ -8,7 +8,7 @@ use std::fs;
 
 
 //general information about the document
-pub struct docinfo{
+pub struct DocInfo{
     title: String,
     font: String,
 }
@@ -137,7 +137,7 @@ fn main() {
         format::text_parser(&format_parser_output, &outfile, logical_parser_output.2);
     }
     else if format == "logic"{
-        fs::write(outfile, logical_parser_output.0);
+        fs::write(outfile, logical_parser_output.0).expect("File System error");
     }
     else{
         println!("error: unknown format");
