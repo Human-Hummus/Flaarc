@@ -9,6 +9,18 @@ pub fn read_file(filename:&String) -> String{
     return data.to_string();
 }
 
+//count the number of newline chars before the position "pos" 
+fn lines_to_pos(vc: &Vec<char>, pos: usize) -> i32{
+    let mut count = 0;
+    let mut curpos = 0;
+    while curpos < pos && curpos < vc.len(){
+        if vc[curpos] == '\n'{
+            count += 1;
+        }
+        curpos+=1;
+    }
+    return count
+}
 
 //get the var, give text and position in the text, it'll return the content of the var, and the new
 //position. 
@@ -30,7 +42,10 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
         x+=1;
     }
     if x < vars.len(){output = vars[x][1].clone();}
-    else{error::error("variable {var_name} is unknown. Make sure you terminated the variable with whitespace(which will NOT be written to the output), and that you didn't put whitespace within or immediately after the variable decleration.");}
+    else{
+        println!("warning: variable \"{}\" (on line {}) is unknown.\nMake sure you terminated the variable with whitespace(which will NOT be written to the output), and that you didn't put whitespace within or immediately after the variable decleration.", var_name, lines_to_pos(&chars, pos));
+        return (String::from("(ERROR, VAR NOT FOUND)"), pos);
+    }
     if chars[pos] != '\n'{
         pos+=1;
     }
@@ -107,6 +122,13 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
             let mut todo:String = String::new();
             let mut run_on:String = String::new();
             pos+=1;
+            if chars[pos] == '#'{
+                //we know this is a note.
+                while pos < chars.len() && chars[pos] != '\n'{
+                    pos+=1;
+                }
+            }
+            else{
             while chars[pos] != ' ' && chars[pos] != '\t'{todo+=&chars[pos].to_string();pos+=1;}
             while chars[pos] == ' ' || chars[pos] == '\t'{pos+=1;}
             while chars[pos] != '\n'{run_on+=&chars[pos].to_string();pos+=1;}
@@ -169,10 +191,15 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
             else if todo == "image"{
                 output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
             }
+            else if todo == " skip "{
+                // we can skip this section.
+            }
             
             else{
-                error::error("incomplete hash, logic");
+                println!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &todo);
+                output+="(ILLEGAL HASH FUNCTION)\n";
             }
+        }
             pos+=1;
         }
         else if chars[pos] == '$'{

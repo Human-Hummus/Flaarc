@@ -65,6 +65,26 @@ There are reserved functions:
 	The link function makes links.
 }
 
+#section Variables
+To declare a variable, you need a "\#" preceded by a newline, immediately proceeded by the text "define", then a space, then the name of the variable, then a space, then the content of the variable, and finally, a newline.
+For example, if you want to declare the variable "x" and set it to contain "this is in x!" you'd type:
+
+\#define x this is in x!
+#define x this is in x!
+
+To use a variable within text, type the variable's name preceded by a '\$', and proceded by a space. Note that the space will be ignored, if you want a space after a variable, type two spaces.
+To access the contents of x,
+
+                               Note the space here.
+                                         v
+I've set the variable x. I've set x to "\$x ".
+This will be converted to:
+I've set the variable x. I've set x to "$x ".
+                                         ^
+			Note the __lack__ of the space here.
+
+
+## if you're reading the flaarc readme, you can see, it really works!!?!?!?!?!? 
 
 
 #section Thank you.
