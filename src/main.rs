@@ -1,10 +1,11 @@
 mod logic;
 use chrono;
 use chrono::Datelike;
-mod settings;
 use std::env;
 mod format;
 use std::fs;
+
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 
 //general information about the document
@@ -17,7 +18,7 @@ pub struct DocInfo{
 // define the standard vars.
 pub fn std_vars() -> Vec<Vec<String>>{
     let mut out:Vec<Vec<String>> = vec![];
-    out.push(["version".to_string(), settings::version()].to_vec());
+    out.push(["version".to_string(), VERSION.to_string()].to_vec());
     out.push(["year".to_string(), chrono::Utc::now().year().to_string()].to_vec());
     out.push(["month".to_string(), chrono::Utc::now().month().to_string()].to_vec());
     out.push(["day".to_string(), chrono::Utc::now().day().to_string()].to_vec());
