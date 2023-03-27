@@ -274,6 +274,14 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
             }
             pos+=1;
         }
+        else if chars[pos] == '<'{
+            output+="\\<";
+            pos+=1;
+        }
+        else if chars[pos] == '>'{ 
+            output+="\\>";
+            pos+=1;
+        }
         else{
             output += &chars[pos].to_string();
             pos+=1;

@@ -34,7 +34,7 @@ Hashes are lines that begin with the '\#' symbol. There are a few types of hashe
 
 
 \#\#: this is a note, a line that starts with two hashes **and a space** will be discarded by the Flaarc parser.
-\#section {name}: make a section, this means make a <h2> tag in the emmitted HTML.
+\#section {name}: make a section, this means make a \<h2\> tag in the emmitted HTML.
 \#title {title}: set the title, this will be the title of the webpage, and will be printed at the top, defaults to: "title". Creative, I know.
 \#setfont {font} set the font.
 
