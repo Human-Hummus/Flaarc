@@ -81,8 +81,12 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 
 
 
-##  Features I want to add:
+##  Features I want to add/TO DO:
 
+- right align function.
+- left align function.
+- safer function calls.
+- windows OS support.
 - web image support.
 - standard library of functions.
 - an optional GUI.

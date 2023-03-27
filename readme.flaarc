@@ -88,8 +88,12 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 
 
 
-#section Features I want to add:
+#section Features I want to add/TO DO:
 {list:
+	right align function.
+	left align function.
+	safer function calls.
+	windows OS support.
 	web image support.
 	standard library of functions.
 	an optional GUI.
