@@ -19,8 +19,6 @@ Some other options include:
 	frog:		Don't worry about it.
 }
 
-
-
 #section Italics & Bold.
 Italics can be defined with the text intended to be italicized surrounded by "\/\/".
 For example, "\//italic text\//" makes "//italic text//"
@@ -90,8 +88,6 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 
 #section Features I want to add/TO DO:
 {list:
-	right align function.
-	left align function.
 	windows OS support.
 	web image support.
 	standard library of functions.

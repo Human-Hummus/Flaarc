@@ -89,6 +89,16 @@ pub fn format_parser(input: &String) -> String{
                 pos+=1;
             }
 
+            else if command == "center"{
+                output+="\\STARTCENTER\\";
+                depthinfo.push('c') //c for center
+            }
+
+            else if command == "right"{
+                output+="\\STARTRIGHT\\";
+                depthinfo.push('r'); //r for right align.
+            }
+
             else{ pos+=1; } //oof
 
 
@@ -100,7 +110,13 @@ pub fn format_parser(input: &String) -> String{
             }
             if terminated == 'u'{ //u is for (u)rl
                 output+="\\ENDLINK\\";
-            } 
+            }
+            if terminated == 'c'{ // c is for center
+                output+="\\ENDCENTER\\";
+            }
+            if terminated == 'r'{ // r is for right (align)
+                output+="\\ENDRIGHT\\";
+            }
             pos+=1;
         }
         else if chars[pos] == '\n'{
@@ -260,6 +276,18 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDIMAGE"{
                     output+=")";
                 }
+                else if action == "STARTRIGHT"{
+                    output+="<div style=\"text-align: right\">";
+                }
+                else if action == "STARTCENTER"{
+                    output+="<div style=\"text-align: center\">";
+                }
+                else if action == "ENDRIGHT"{
+                    output+="</div>"
+                }
+                else if action == "ENDCENTER"{
+                    output+="</div>"
+                }
                 else {
                     println!("failed action: {}", action);
                 }
@@ -373,6 +401,18 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDIMAGE"{
                     output+="\">"
                 }
+                else if action == "STARTRIGHT"{
+                    output+="<div style=\"text-align: right\">";
+                }
+                else if action == "STARTCENTER"{
+                    output+="<div style=\"text-align: center\">";
+                }
+                else if action == "ENDRIGHT"{ 
+                    output+="</div>"
+                }
+                else if action == "ENDCENTER"{ 
+                    output+="</div>"
+                }
             }
             
         }
@@ -465,6 +505,12 @@ pub fn text_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDSECTION"{
                     output+="\n=========================\n";
                 }
+                
+                //there's nothing to be done with these.
+                else if action == "STARTRIGHT"{}
+                else if action == "STARTCENTER"{}
+                else if action == "ENDRIGHT"{}
+                else if action == "ENDCENTER"{}
 
             }
             

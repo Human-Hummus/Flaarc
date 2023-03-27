@@ -16,8 +16,6 @@ Some other options include:
 
 - --help / -h:	print help info
 - frog:		Don't worry about it.
-
-
 ##  Italics & Bold.
 Italics can be defined with the text intended to be italicized surrounded by "//".
 For example, "//italic text//" makes "*italic text*"
@@ -83,9 +81,6 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 
 ##  Features I want to add/TO DO:
 
-- right align function.
-- left align function.
-- safer function calls.
 - windows OS support.
 - web image support.
 - standard library of functions.

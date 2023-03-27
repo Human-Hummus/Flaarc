@@ -83,38 +83,17 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
 
     while pos < chars.len(){
         if chars[pos] == '\\'{
-            if chars[pos+1] == '\\'{
-                output+="\\\\";
-                pos+=2;
+            match chars[pos+1]{
+                '\\' => {output+="\\\\"}
+                '#' =>  {output+="\\#"}
+                '{' =>  {output+="\\{"}
+                '}' =>  {output+="\\}"}
+                '$' =>  {output+="$"}
+                '_' =>  {output+="\\_"}
+                '/' =>  {output+="\\/"}
+                _ =>    {output+="\\\\";pos-=1;}
             }
-            else if chars[pos+1] == '#'{ 
-                output+="\\#";
-                pos+=2;
-            }
-            else if chars[pos+1] == '{'{ 
-                output+="\\{";
-                pos+=2;
-            }
-            else if chars[pos+1] == '}'{ 
-                output+="\\}";
-                pos+=2;
-            }
-            else if chars[pos+1] == '$'{ 
-                output+="$";
-                pos+=2;
-            }
-            else if chars[pos+1] == '_'{ 
-                output+="\\_";
-                pos+=2;
-            }
-            else if chars[pos+1] == '/'{ 
-                output+="\\/";
-                pos+=2;
-            }
-            else {
-                output+="\\\\";
-                pos+=1;
-            }
+            pos+=2;
         }
         
         else if chars[pos] == '#'{
@@ -214,20 +193,22 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
             pos = tmp.1;
         }
         else if chars[pos] == '{'{
-            if chars[pos+1] == 'l'{
-                output += "{";
+            let prevpos = pos;
+
+            pos+=1;
+            let mut function = String::new();
+            let mut input = String::new();
+            let mut depth = 1; 
+
+            while chars[pos] != ':' && chars[pos] != '}'{ // find what the function //is//
+                function+=&chars[pos].to_string();
                 pos+=1;
             }
+            if function == "center" || function == "right" || function == "list" || function == "link"{
+                output+="{";
+                pos = prevpos+1;
+            }
             else{
-                pos+=1;
-                let mut function = String::new();
-                let mut input = String::new();
-                while chars[pos] != ':' && chars[pos] != '}'{ // find what the function //is//
-                    function+=&chars[pos].to_string();
-                    pos+=1;
-                }
-
-                let mut depth = 1; 
                 loop{
                     if depth < 1{break;}
 
@@ -266,7 +247,6 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 let parsed_exec = logical_parser(&executed, vars);
                 vars = parsed_exec.1;
                 output+=&parsed_exec.0;
-                
             }
         }
         else if chars[pos] == '#'{
