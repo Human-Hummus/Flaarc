@@ -124,7 +124,7 @@ pub fn format_parser(input: &String) -> String{
 
             else{
                 if pos > 0 && chars[pos-1] == '\n' && is_paragraph{
-                    is_paragraph=false;output+="\\ENDPARAGRAPH\\";println!("p");
+                    is_paragraph=false;output+="\\ENDPARAGRAPH\\";
                 }
                 else{output+="\n";}
                 pos+=1;
@@ -202,7 +202,6 @@ pub fn markdown_parser(text: &String, output_file: &String, info: docinfo){
                     action+=&chars[pos].to_string();
                     pos+=1;
                 }
-                println!("action: {}", action);
                 pos+=1;
                 if action == "STARTBOLD"{
                     output+="**"

@@ -1,11 +1,13 @@
 use std::fs;
 use std::process::Command;
-mod error;
 use crate::docinfo;
 
 
 pub fn read_file(filename:&String) -> String{
-    let data = fs::read_to_string(filename).expect("Unable to read file");
+    let data = fs::read_to_string(filename).unwrap_or_else(|error|{
+        println!("Warning: unable to read file with name \"{}\"", filename);
+        return "\nFILE SYSTEM ERROR\n".to_string();
+    });
     return data.to_string();
 }
 
@@ -43,8 +45,8 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
     }
     if x < vars.len(){output = vars[x][1].clone();}
     else{
-        println!("warning: variable \"{}\" (on line {}) is unknown.\nMake sure you terminated the variable with whitespace(which will NOT be written to the output), and that you didn't put whitespace within or immediately after the variable decleration.", var_name, lines_to_pos(&chars, pos));
-        return (String::from("(ERROR, VAR NOT FOUND)"), pos);
+        println!("Warning: variable \"{}\" (on line {}) is unknown.\nMake sure you terminated the variable with whitespace(which will NOT be written to the output),\nand that you didn't put whitespace within or immediately after the variable decleration.", var_name, lines_to_pos(&chars, pos));
+        return (String::from("(ERROR; VAR NOT FOUND)"), pos);
     }
     if chars[pos] != '\n'{
         pos+=1;
@@ -129,76 +131,83 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 }
             }
             else{
-            while chars[pos] != ' ' && chars[pos] != '\t'{todo+=&chars[pos].to_string();pos+=1;}
-            while chars[pos] == ' ' || chars[pos] == '\t'{pos+=1;}
-            while chars[pos] != '\n'{run_on+=&chars[pos].to_string();pos+=1;}
+                while chars[pos] != ' ' && chars[pos] != '\t'{todo+=&chars[pos].to_string();pos+=1;}
+                while chars[pos] == ' ' || chars[pos] == '\t'{pos+=1;}
+                while chars[pos] != '\n'{run_on+=&chars[pos].to_string();pos+=1;}
             
-            if todo == "define" || todo == "set" || todo == "let"{
-                //This is a variable.
-                let variable_def_chars:Vec<char> = run_on.chars().collect();
-                let mut variable_name = String::new();
-                let mut variable_content = String::new();
-                let mut x = 0;
+                if todo == "define" || todo == "set" || todo == "let"{
+                    //This is a variable.
+                    let variable_def_chars:Vec<char> = run_on.chars().collect();
+                    let mut variable_name = String::new();
+                    let mut variable_content = String::new();
+                    let mut x = 0;
                 
-                while variable_def_chars[x] != ' ' && variable_def_chars[x] != '\t' && variable_def_chars[x] != '\n' && x < variable_def_chars.len(){ //get the name of the var.
-                    variable_name+=&variable_def_chars[x].to_string();
-                    x+=1;
-                }
+                    while x < variable_def_chars.len() && variable_def_chars[x] != ' ' && variable_def_chars[x] != '\t' && variable_def_chars[x] != '\n'{ //get the name of the var.
+                        variable_name+=&variable_def_chars[x].to_string();
+                        x+=1;
+                    }
+                    
+                    while x < variable_def_chars.len() && (variable_def_chars[x] == ' ' || variable_def_chars[x] == '\t' || variable_def_chars[x] == '\n'){x+=1;} //skip whitespace; find the first char of interest.
                 
-                while variable_def_chars[x] == ' ' || variable_def_chars[x] == '\t' || variable_def_chars[x] == '\n' && x < variable_def_chars.len(){x+=1;} //skip whitespace; find the first char of interest.
-                
-                while x<variable_def_chars.len(){ // read the content of the var.
-                    variable_content+=&variable_def_chars[x].to_string();
-                    x+=1;
-                }
-                let tmp = logical_parser(&variable_content, vars);
-                variable_content = tmp.0;
-                vars = tmp.1;
+                    while x<variable_def_chars.len(){ // read the content of the var.
+                        variable_content+=&variable_def_chars[x].to_string();
+                        x+=1;
+                    }
+                    let tmp = logical_parser(&variable_content, vars);
+                    variable_content = tmp.0;
+                    vars = tmp.1;
 
-
-                if variable_name.len() < 1{error::error("incomplete variable definition.");}
-                if variable_content.len() < 1{error::error("variable \"{variable_name}\"'s content wasn't defined.");}
+                    //making this part a loop so that instead of exiting the program, we can break out
+                    //of the loop.
+                    loop {
+                        if variable_name.len() < 1{
+                            println!("Warning! illegal variable definition on line {}", lines_to_pos(&chars, pos));
+                            output+="\nILLEGAL VARIABLE DEFINITION HERE\n";
+                            break;
+                        }
+                        if variable_content.len() < 1{
+                            println!("Warning! Variable \"{}\" on line {} didn't have a proper definition of it's contents", variable_name, lines_to_pos(&chars, pos));
+                            output+="\nIMPROPER VARIABLE DEFINITION\n"
+                        }
                 
-                let mut var_pos = 10000000000000;
-                x = 0;
-
-                //find if (and where) the var is in the vars list.
-                while x < vars.len(){
-                    if vars[x][0] == variable_name{
-                        var_pos = x;
+                        let mut var_pos = 10000000000000;
+                        x = 0;
+    
+                        //find if (and where) the var is in the vars list.
+                        while x < vars.len(){
+                            if vars[x][0] == variable_name{
+                                var_pos = x;
+                                break;
+                            }
+                            x+=1;
+                        }
+                        if var_pos != 10000000000000{vars[var_pos][1] = variable_content;}
+                        else{vars.push([variable_name, variable_content].to_vec());}
                         break;
                     }
-                    x+=1;
                 }
-                if var_pos != 10000000000000{vars[var_pos][1] = variable_content;}
-                else{vars.push([variable_name, variable_content].to_vec());}
-            }
-            else if todo == "include" || todo == "import" || todo == "use"{
-                //HOLY SHIT!!!!!!1!!!!!!11!! IT'S FUCKING RECURSIVVVVE!!!!!!
-                let tmp = logical_parser(&read_file(&run_on), vars);
-                output+=&tmp.0;
-                vars = tmp.1;
-            }
-            else if todo == "title"{
-                docinf.title = run_on;
-            }
-            else if todo == "setfont"{
-                docinf.font = run_on;
-            }
-            else if todo == "section"{
-                output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
-            }
-            else if todo == "image"{
-                output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
-            }
-            else if todo == " skip "{
-                // we can skip this section.
-            }
-            
-            else{
-                println!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &todo);
-                output+="(ILLEGAL HASH FUNCTION)\n";
-            }
+                else if todo == "include" || todo == "import" || todo == "use"{
+                    //HOLY SHIT!!!!!!1!!!!!!11!! IT'S FUCKING RECURSIVVVVE!!!!!!
+                    let tmp = logical_parser(&read_file(&run_on), vars);
+                    output+=&tmp.0;
+                    vars = tmp.1;
+                }
+                else if todo == "title"{
+                    docinf.title = run_on;
+                }
+                else if todo == "setfont"{
+                    docinf.font = run_on;
+                }
+                else if todo == "section"{
+                    output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
+                }
+                else if todo == "image"{
+                    output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
+                }
+                else{
+                    println!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &todo);
+                    output+="(ILLEGAL HASH FUNCTION)\n";
+                }
         }
             pos+=1;
         }
