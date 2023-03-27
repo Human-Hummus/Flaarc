@@ -67,15 +67,13 @@ For example, if you want to declare the variable "x" and set it to contain "this
 \#define x this is in x!
 
 To use a variable within text, type the variable's name preceded by a '$', and proceded by a space. Note that the space will be ignored, if you want a space after a variable, type two spaces.
-To access the contents of x,
+To access the contents of x, we could say:
 
-                               Note the space here.
-                                         v
-I've set the variable x. I've set x to "$x ".
+I've set the variable x to "$x ".
 This will be converted to:
-I've set the variable x. I've set x to "this is in x!".
-                                         ^
-		Note the **lack** of the space here.
+I've set the variable x to "this is in x!".
+
+Note how the space following $x is present *before* parsing, but not after.
 
 
 
