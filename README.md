@@ -42,6 +42,23 @@ Hashes are lines that begin with the '\#' symbol. There are a few types of hashe
 to type a \# on it's own, ensure it's preceded by a backslash, like this: \\\#.
 
 
+##  Functions
+Functions in Flaarc are just programs. You can make your own functions by copying the executable file into "/lib/flaarc".
+The syntax of a function is as follows:
+{ FUNCTION\_NAME\_HERE : FUNCTION ARG HERE }
+Upon seeing this, the parser will try to run a program in the directory /lib/flaarc and will pass the "FUNCTION ARG HERE" section as **one** CLI argument to the program. Anything the program writes to the standard output will be parsed and then put in the document. Because it's parsed, it's syntactically legal to declare variables and even call other function within the output of the program. 
+Note: if the funtion is called without a ':', and therefore no argument to pass to the progam, it will run the program without passing anything to it.
+
+One way this could be used, is if you want to be able to import your name, make a title, etc. **without** having to retype it every time you make a new document, you could make a function that you could call at the beginning of the document that retuns the needed text.
+
+There are reserved functions:
+
+- he list function makes lists.
+- The link function makes links.
+
+##  Thank you.
+I want to say, thank you for showing interest in this hobby project, it's been fun for me, and I hope you'll have fun too.
+
 
 ##  Features I want to add:
 

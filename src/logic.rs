@@ -39,9 +39,16 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
 
 //run a function.
 fn exec_fn(function: &String, text: &String) -> String{
-    println!("fn name: {}", function);
-    let returned:String = String::from_utf8_lossy(&Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().expect("nonexistent function").stdout).to_string();
-    return returned;
+    let mut toret = "ERROR".to_string();
+    if cfg!(unix){
+        println!("fn name: {}", function);
+        toret = String::from_utf8_lossy(&Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().expect("nonexistent function").stdout).to_string();
+    }
+    if cfg!(windows){
+        println!("fn name: {}", function);
+        toret = String::from_utf8_lossy(&Command::new("C:\\Program Files\\flaarc\\".to_owned() + &(function.to_string() + ".exe")).arg(text).output().expect("nonexistent function").stdout).to_string();
+    }
+    return toret.to_string();
 }
 
 
