@@ -31,7 +31,7 @@ For example, to type \__, you would type \\\__ instead.
 
 
 #section Hashes
-Hashes are lines that begin with the '\#' symbol. There are a few types of hashes:
+{upper:Hashes are lines that begin with the '\#' symbol. There are a few types of hashes:}
 
 
 \#\#: this is a note, a line that starts with two hashes __and a space__ will be discarded by the Flaarc parser.
@@ -85,7 +85,6 @@ Note how the space following \$x is present //before// parsing, but not after.
 
 #section Thank you.
 I want to say thank you for showing interest in this hobby project. It's been fun for me, and I hope you'll have fun too.
-
 
 
 #section Features I want to add/TO DO:
