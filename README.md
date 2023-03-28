@@ -57,6 +57,8 @@ There are reserved functions:
 
 - The list function makes lists.
 - The link function makes links.
+- The right function aligns the text to the right.
+- The center function aligns the text to the center.
 ##  Variables
 To declare a variable, you need a "\#" preceded by a newline, immediately proceeded by the text "define", then a space, then the name of the variable, then a space, then the content of the variable, and finally, a newline.
 For example, if you want to declare the variable "x" and set it to contain "this is in x!" you'd type:
@@ -81,10 +83,10 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 
 ##  Features I want to add/TO DO:
 
+- better installer.
 - windows OS support.
 - web image support.
-- standard library of functions.
+- **good** standard library of functions.
 - an optional GUI.
-- better error messages.
 - highlight support.
 - table support.

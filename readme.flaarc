@@ -60,6 +60,8 @@ There are reserved functions:
 {list:
 	The list function makes lists.
 	The link function makes links.
+	The right function aligns the text to the right.
+	The center function aligns the text to the center.
 }
 
 #section Variables
@@ -88,11 +90,11 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 
 #section Features I want to add/TO DO:
 {list:
+	better installer.
 	windows OS support.
 	web image support.
-	standard library of functions.
+	__good__ standard library of functions.
 	an optional GUI.
-	better error messages.
 	highlight support.
 	table support.
 }
