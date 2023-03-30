@@ -82,6 +82,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
     let mut pos = 0;
 
     while pos < chars.len(){
+        println!("{}", chars[pos]);
         if chars[pos] == '\\'{
             match chars[pos+1]{
                 '\\' => {output+="\\\\"}
@@ -204,6 +205,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 function+=&chars[pos].to_string();
                 pos+=1;
             }
+            pos +=1;
             if function == "center" || function == "right" || function == "list" || function == "link"{
                 output+="{";
                 pos = prevpos+1;
