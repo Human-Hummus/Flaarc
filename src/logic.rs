@@ -206,7 +206,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 pos+=1;
             }
             pos +=1;
-            if function == "center" || function == "right" || function == "list" || function == "link"{
+            if function == "center" || function == "right" || function == "list" || function == "link" || function == "mark"{
                 output+="{";
                 pos = prevpos+1;
             }

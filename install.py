@@ -31,7 +31,9 @@ os.system("mkdir /lib/flaarc")
 
 libfns = [
         ["if equal.c", "if equal"],
-        ["upper.c", "upper"]
+        ["upper.c", "upper"],
+        ["lower.c", "lower"],
+        ["length.c", "length"]
         ]
 
 for i in libfns:
