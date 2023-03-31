@@ -19,7 +19,7 @@ Some other options include:
 	frog:		Don't worry about it.
 }
 
-#section Italics & Bold.
+#section Basic Formatting; Italics, Bold, Superscripts, Subscripts, and Highlights.
 Italics can be defined with the text intended to be italicized surrounded by "\/\/".
 For example, "\//italic text\//" makes "//italic text//"
 
@@ -28,6 +28,12 @@ For example, "\__bold text\__" becomes "__bold text__"
 
 If you want to type \__ or \// __without__ bolding or italicizing the text, precede the chars with a backslash.
 For example, to type \__, you would type \\\__ instead.
+
+Superscripts are similar. If you want "x^2^", you would type "x\^2\^".
+
+Subscripts are quite diffent, for this you need to use the "sub" function. For example, to type "H{sub:2}O", you'd type "H\{sub:2\}O". See the "Functions" section for more details on how functions work.
+
+Highlighting works just like subscripts in that it uses a function, this time the "mark" function. If you want to type "{mark:highlight}", you'd type "\{mark:highlight\}"
 
 
 #section Hashes
@@ -81,6 +87,67 @@ I've set the variable x to "$x ".
 Note how the space following \$x is present //before// parsing, but not after.
 
 ## if you're reading the flaarc readme, you can see, it really works!!?!?!?!?!? 
+
+Some variables are defined by the parser, __not__ the user, however the user can redefine them as they please.
+
+The following is a full list of the default variables and their values.
+
+{table:
+version|current of the parser
+year|current year
+month|current month
+day|current day of the month
+invbang|$invbang
+copy|$copy
+reg|$reg
+deg|$deg
+plusmn|$plusmn
+micro|$micro
+theta|$theta
+omega|$omega
+alpha|$alpha
+beta|$beta
+gamma|$gamma
+delta|$delta
+sigma|$sigma
+pi|$pi
+cap_omega|$cap_omega
+bullet|$bullet
+block|$block
+light_shade|$light_shade
+med_shade|$med_shade
+dark_shade|$dark_shade
+thunder|$thunder
+fist|$fist
+check|$check
+x|✘
+sparkle|$sparkle
+cross|$cross
+black_heart|$black_heart
+smile|$smile
+veryfunny|$veryfunny
+smile2|$smile2
+embarrassment|$embarrassment
+cool|$cool
+smirk|$smirk
+apathy|$apathy
+crying|$crying
+ono|$ono
+Smile|$Smile (yes, they're case-sensitive)
+nerd|$nerd
+brain|$brain
+cap|$cap
+frog|don't worry about it
+the following vars are AFTER a char|IE:a\$var
+accute|x$accute
+overline|x$overline
+diaresis|x$diaresis
+}
+
+
+#section Tables
+TABLES
+
 
 
 #section Thank you.

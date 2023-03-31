@@ -16,7 +16,7 @@ Some other options include:
 
 - --help / -h:	print help info
 - frog:		Don't worry about it.
-##  Italics & Bold.
+##  Basic Formatting; Italics, Bold, Superscripts, Subscripts, and Highlights.
 Italics can be defined with the text intended to be italicized surrounded by "//".
 For example, "//italic text//" makes "*italic text*"
 
@@ -25,6 +25,12 @@ For example, "\_\_bold text\_\_" becomes "**bold text**"
 
 If you want to type \_\_ or // **without** bolding or italicizing the text, precede the chars with a backslash.
 For example, to type \_\_, you would type \\\_\_ instead.
+
+Superscripts are similar. If you want "x<sup>2</sup>", you would type "x\\<sup>2\\</sup>".
+
+Subscripts are quite diffent, for this you need to use the "sub" function. For example, to type "H<sub>2</sub>O", you'd type "H{sub:2}O". See the "Functions" section for more details on how functions work.
+
+Highlighting works just like subscripts in that it uses a function, this time the "mark" function. If you want to type "<mark>highlight</mark>", you'd type "{mark:highlight}"
 
 
 ##  Hashes
@@ -73,6 +79,67 @@ This will be converted to:
 I've set the variable x to "this is in x!".
 
 Note how the space following $x is present *before* parsing, but not after.
+
+
+Some variables are defined by the parser, **not** the user, however the user can redefine them as they please.
+
+The following is a full list of the default variables and their values.
+
+
+|version|current of the parser|
+|---|---|
+|year|current year|
+|month|current month|
+|day|current day of the month|
+|invbang|¡|
+|copy|©|
+|reg|®|
+|deg|°|
+|plusmn|±|
+|micro|µ|
+|theta|ϴ|
+|omega|Ω|
+|alpha|α|
+|beta|β|
+|gamma|γ|
+|delta|Δ|
+|sigma|Σ|
+|pi|π|
+|cap\_omega|Ѡ|
+|bullet|•|
+|block|█|
+|light\_shade|░|
+|med\_shade|▒|
+|dark\_shade|▓|
+|thunder|⚡|
+|fist|✊|
+|check|✔|
+|x|✘|
+|sparkle|✨|
+|cross|❌|
+|black\_heart|❤|
+|smile|😀|
+|veryfunny|😂|
+|smile2|😃|
+|embarrassment|😅|
+|cool|😎|
+|smirk|😏|
+|apathy|😐|
+|crying|😢|
+|ono|😳|
+|Smile|🙂(yes, they're case-sensitive)|
+|nerd|🤓|
+|brain|🧠|
+|cap|🧢|
+|frog|don't worry about it|
+|the following vars are AFTER a char|IE:a$var|
+|accute|x ́|
+|overline|x ̅|
+|diaresis|x ̈|
+
+
+##  Tables
+TABLES
 
 
 

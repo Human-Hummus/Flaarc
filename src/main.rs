@@ -71,6 +71,7 @@ pub fn std_vars() -> Vec<Vec<String>>{
     out.push(["nerd".to_string(), "🤓".to_string()].to_vec());
     out.push(["brain".to_string(), "🧠".to_string()].to_vec());
     out.push(["cap".to_string(), "🧢".to_string()].to_vec());
+    out.push(["frog".to_string(), include_str!("sexy frog.txt")].to_vec());
     return out;
 }
 
