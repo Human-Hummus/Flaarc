@@ -28,5 +28,8 @@ test var is {length:$test } chars long.
 
 __//{center:{link:https://github.com/Human-Hummus/Flaarc|Link to the repo, centered, bolded, italicized}}//__
 
-
-{table:table_test.csv}
+{table:
+a|b|c
+a|b|c
+lol|lol|lol
+}

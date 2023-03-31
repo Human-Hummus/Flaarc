@@ -36,7 +36,6 @@ libfns = [
         ["length.c", "length"]
         ]
 libfns_rs =[
-        ["table.rs", "table"]
         ]
 
 for i in libfns:

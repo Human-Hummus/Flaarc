@@ -23,6 +23,8 @@ pub fn format_parser(input: &String) -> String{
     let mut is_bold = false;
     let mut is_italic = false;
     let mut is_paragraph = false;
+    let mut is_table_item = false;
+    let mut is_table_row = false;
 
     while pos < chars.len(){
         if chars[pos] == '_'  && pos < chars.len()-1 && chars[pos+1] == '_'{
@@ -60,7 +62,8 @@ pub fn format_parser(input: &String) -> String{
             pos+=1;
             while chars[pos] == ' ' || chars[pos] == '\n' || chars[pos] == '\t'{ pos+=1; }
             
-            if command == "list"{
+            match command.as_str(){
+                "list" => {
                     output+="\\STARTLIST\\";
                     let mut new_item_follows = false;
                     let mut x = pos;
@@ -68,53 +71,63 @@ pub fn format_parser(input: &String) -> String{
                         if chars[x] != ' ' && chars[x] != '\n' && chars[x] != '\t'{ new_item_follows = true; break; }
                         x+=1;
                     }
-
                     if new_item_follows { output+="\\STARTLISTITEM\\"; }
-                    //l is for link
-                    depthinfo.push('l');
-            }
+                    depthinfo.push('l');//l is for link
+                }
 
-
-            else if command == "link"{
-                let mut link_address = String::new();
-                while chars[pos] != '|' && chars[pos] != '}'{
-                  link_address+=&chars[pos].to_string();
+                "link" => {
+                    let mut link_address = String::new();
+                    while chars[pos] != '|' && chars[pos] != '}'{
+                        link_address+=&chars[pos].to_string();
+                        pos+=1;
+                    }
+                    output+=&("\\STARTLINK:".to_owned() + &(link_address.clone() + "\\"));
+        
+                    if chars[pos] != '}'{ depthinfo.push('u'); }//U is for Url.
+                    else{ output+=&(link_address + "\\ENDLINK\\"); }
                     pos+=1;
                 }
-                output+=&("\\STARTLINK:".to_owned() + &(link_address.clone() + "\\"));
-        
-                //U is for Url.
-                if chars[pos] != '}'{ depthinfo.push('u'); }
-                else{ output+=&(link_address + "\\ENDLINK\\"); }
-                pos+=1;
-            }
 
-            else if command == "center"{
-                output+="\\STARTCENTER\\";
-                depthinfo.push('c') //c for center
-            }
+                "center" => {
+                    output+="\\STARTCENTER\\";
+                    depthinfo.push('c') //c for center
+                }
 
-            else if command == "right"{
-                output+="\\STARTRIGHT\\";
-                depthinfo.push('r'); //r for right align.
-            }
-            else if command == "mark"{
-                output+="\\STARTMARK\\";
-                depthinfo.push('h'); //h is for highlight.
-            }
+                "right" => {
+                    output+="\\STARTRIGHT\\";
+                    depthinfo.push('r'); //r for right align.
+                }
+                "mark" => {
+                    output+="\\STARTMARK\\";
+                    depthinfo.push('h'); //h is for highlight.
+                }
+                "table" => {
+                    output+="\\STARTTABLE\\";
+                    depthinfo.push('t'); //t for table
+                }
 
-            else{ pos+=1; } //oof
+                _ => { pos+=1; } //oof
+            }
 
 
         }
         else if chars[pos] == '}'{
             let terminated:char = depthinfo.pop().unwrap();
             match terminated{
-                'l' => {output+="\\ENDLIST\\";} //list
-                'u' => {output+="\\ENDLINK\\";} //urls
-                'c' => {output+="\\ENDCENTER\\";} //center
-                'r' => {output+="\\ENDRIGHT\\";} //right align
-                'h' => {output+="\\ENDMARK\\";} //highlight
+                'l' => {output+="\\ENDLIST\\";}     //list
+                'u' => {output+="\\ENDLINK\\";}     //urls
+                'c' => {output+="\\ENDCENTER\\";}   //center
+                'r' => {output+="\\ENDRIGHT\\";}    //right align
+                'h' => {output+="\\ENDMARK\\";}     //highlight
+                't' => {                            //table
+                    if is_table_item{
+                        flip_bool!(is_table_item);
+                        output+="\\ENDTABLEITEM\\"}
+                    if is_table_row{
+                        flip_bool!(is_table_row);
+                        output+="\\ENDTABLEROW\\"}
+                    output+="\\ENDTABLE\\";} 
+
                 _ => {}//somethings wrong
             }
             pos+=1;
@@ -135,6 +148,17 @@ pub fn format_parser(input: &String) -> String{
                     output+="\\STARTLISTITEM\\";
                 }
 
+                pos+=1;
+            }
+            else if depthinfo.contains(&'t'){
+                if is_table_item{
+                    flip_bool!(is_table_item);
+                    output+="\\ENDTABLEITEM\\";
+                }
+                if is_table_row{
+                    flip_bool!(is_table_row);
+                    output+="\\ENDTABLEROW\\";
+                }
                 pos+=1;
             }
 
@@ -175,8 +199,26 @@ pub fn format_parser(input: &String) -> String{
             is_paragraph = true;
             pos+=1;
         }
+        else if chars[pos] == '|' && depthinfo.contains(&'t'){
+            if is_table_item{
+                flip_bool!(is_table_item);
+                output+="\\ENDTABLEITEM\\";
+            }
+            pos+=1;
+        }
 
         else{
+            if depthinfo.contains(&'t') && chars[pos] != ' ' && chars[pos] != '\t'{
+                if !is_table_row{
+                    flip_bool!(is_table_row);
+                    output+="\\STARTTABLEROW\\";
+                }
+                if !is_table_item{
+                    flip_bool!(is_table_item);
+                    output+="\\STARTTABLEITEM\\"
+                }
+                
+            }
             output+=&chars[pos].to_string();
             pos+=1;
         }
@@ -203,6 +245,8 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
     let chars:Vec<char> = text.chars().collect();
     let mut current_link = String::new();
     let mut list_depth = 0;
+    let mut table_row_number = 0;
+    let mut row_items_number = 0;
     
     while pos < chars.len() {
         //println!("{}, {}", chars[pos], pos);
@@ -288,6 +332,41 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDCENTER"{
                     output+="</div>"
                 }
+                else if action == "STARTTABLE"{
+                    //do nothing
+                }
+                else if action == "ENDTABLE"{
+                    //do nothing
+                }
+                else if action == "STARTTABLEROW"{
+                    if table_row_number == 1{
+                        output+="\n|";
+                        while 0 < row_items_number{
+                            row_items_number-=1;
+                            output+="---|";
+                        }
+                    }
+                    output+="\n|";
+                    table_row_number+=1;
+                    row_items_number=0;
+                }
+                else if action == "ENDTABLEROW"{
+                    //do nothing
+                }
+                else if action == "STARTTABLEITEM"{
+                    //do nothing
+                }
+                else if action == "ENDTABLEITEM"{
+                    output+="|";
+                    row_items_number+=1;
+                }
+                else if action == "STARTMARK"{
+                    output+="<mark>"
+                }
+                else if action == "ENDMARK"{
+                    output+="</mark>"
+                }
+
                 else {
                     println!("failed action: {}", action);
                 }
@@ -418,6 +497,24 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
                 }
                 else if action == "ENDMARK"{
                     output+="</mark>"
+                }
+                else if action == "STARTTABLE"{
+                    output+="<table>"
+                }
+                else if action == "ENDTABLE"{
+                    output+="</table>"
+                }
+                else if action == "STARTTABLEITEM"{
+                    output+="<th>"
+                }
+                else if action == "ENDTABLEITEM"{
+                    output+="</th>"
+                }
+                else if action == "STARTTABLEROW"{
+                    output+="<tr>"
+                }
+                else if action == "ENDTABLEROW"{
+                    output+="</tr>"
                 }
             }
             
