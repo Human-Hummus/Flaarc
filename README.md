@@ -80,7 +80,6 @@ Note how the space following $x is present *before* parsing, but not after.
 I want to say thank you for showing interest in this hobby project. It's been fun for me, and I hope you'll have fun too.
 
 
-
 ##  Features I want to add/TO DO:
 
 - better installer.
@@ -88,5 +87,4 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 - web image support.
 - **good** standard library of functions.
 - an optional GUI.
-- highlight support.
-- table support.
+- support for more advanced styling

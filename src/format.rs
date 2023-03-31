@@ -22,6 +22,7 @@ pub fn format_parser(input: &String) -> String{
     let mut depthinfo:Vec<char> = vec![];
     let mut is_bold = false;
     let mut is_italic = false;
+    let mut is_superscript = false;
     let mut is_paragraph = false;
     let mut is_table_item = false;
     let mut is_table_row = false;
@@ -42,6 +43,14 @@ pub fn format_parser(input: &String) -> String{
             }
             flip_bool!(is_italic);
             pos+=2;
+        }
+        else if chars[pos] == '^'{
+            match is_superscript{
+                true => { output+="\\ENDSUPERSCRIPT\\"; }
+                false => { output+="\\STARTSUPERSCRIPT\\"; }
+            }
+            flip_bool!(is_superscript);
+            pos+=1;
         }
         else if chars[pos] == '\\'{
             match chars[pos+1]{
@@ -105,6 +114,10 @@ pub fn format_parser(input: &String) -> String{
                     output+="\\STARTTABLE\\";
                     depthinfo.push('t'); //t for table
                 }
+                "sub" => {
+                    output+="\\STARTSUBSCRIPT\\";
+                    depthinfo.push('s'); //s for subscript
+                }
 
                 _ => { pos+=1; } //oof
             }
@@ -126,7 +139,8 @@ pub fn format_parser(input: &String) -> String{
                     if is_table_row{
                         flip_bool!(is_table_row);
                         output+="\\ENDTABLEROW\\"}
-                    output+="\\ENDTABLE\\";} 
+                    output+="\\ENDTABLE\\";}
+                's' => {output+="\\ENDSUBSCRIPT\\"} //subscript   
 
                 _ => {}//somethings wrong
             }
@@ -366,6 +380,18 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDMARK"{
                     output+="</mark>"
                 }
+                else if action == "STARTSUPERSCRIPT"{
+                    output+="<sup>";
+                }
+                else if action == "ENDSUPERSCRIPT"{
+                    output+="</sup>";
+                }
+                else if action == "STARTSUBSCRIPT"{
+                    output+="<sub>"
+                }
+                else if action == "ENDSUBSCRIPT"{
+                    output+="</sub>";
+                }
 
                 else {
                     println!("failed action: {}", action);
@@ -515,6 +541,18 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
                 }
                 else if action == "ENDTABLEROW"{
                     output+="</tr>"
+                }
+                else if action == "STARTSUPERSCRIPT"{ 
+                    output+="<sup>";
+                } 
+                else if action == "ENDSUPERSCRIPT"{ 
+                    output+="</sup>";
+                }
+                else if action == "STARTSUBSCRIPT"{ 
+                    output+="<sub>"
+                }
+                else if action == "ENDSUBSCRIPT"{ 
+                    output+="</sub>";
                 }
             }
             

@@ -82,7 +82,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
     let mut pos = 0;
 
     while pos < chars.len(){
-        println!("{}", chars[pos]);
+        print!("{}", chars[pos]);
         if chars[pos] == '\\'{
             match chars[pos+1]{
                 '\\' => {output+="\\\\"}
@@ -194,6 +194,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
             pos = tmp.1;
         }
         else if chars[pos] == '{'{
+            println!("asd");
             let prevpos = pos;
 
             pos+=1;
@@ -206,12 +207,13 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 pos+=1;
             }
             pos +=1;
-            if function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table"{
+            if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table"{
                 output+="{";
                 pos = prevpos+1;
             }
             else{
                 loop{
+                    println!("d");
                     if depth < 1{break;}
 
                     if chars[pos] == '\\'{
@@ -227,6 +229,10 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                             input+="\\}";
                             pos+=2;
                         }
+                        else{
+                            input += &chars[pos].to_string();
+                            pos+=1;
+                        }
                     }
                     else if chars[pos] == '{'{
                         depth+=1;
@@ -241,6 +247,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                         pos+=1;
                     }
                 }
+                println!("a");
                 
                 let parsed_input = logical_parser(&input, vars);
                 vars = parsed_input.1;
