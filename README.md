@@ -139,7 +139,17 @@ The following is a full list of the default variables and their values.
 
 
 ##  Tables
-TABLES
+Tables are a fuction with the following syntax:
+
+{list:
+item 1a|item 1b
+item 2a|item 2b
+}
+
+This would produce the following table:
+
+- item 1a|item 1b
+- item 2a|item 2b
 
 
 

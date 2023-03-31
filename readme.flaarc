@@ -146,7 +146,18 @@ diaresis|x$diaresis
 
 
 #section Tables
-TABLES
+Tables are a fuction with the following syntax:
+
+\{list:
+item 1a|item 1b
+item 2a|item 2b
+\}
+
+This would produce the following table:
+{list:
+item 1a|item 1b
+item 2a|item 2b
+}
 
 
 
