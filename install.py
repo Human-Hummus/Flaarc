@@ -35,6 +35,13 @@ libfns = [
         ["lower.c", "lower"],
         ["length.c", "length"]
         ]
+libfns_rs =[
+        ["table.rs", "table"]
+        ]
 
 for i in libfns:
     os.system("cc \"`pwd`/standard_functions/" + i[0] + "\" -o \"/lib/flaarc/" + i[1] + "\"");
+
+
+for i in libfns_rs:
+    os.system("rustc \"`pwd`/standard_functions/" + i[0] + "\" -o \"/lib/flaarc/" + i[1] + "\"");

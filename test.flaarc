@@ -27,3 +27,6 @@ test var is {length:$test } chars long.
 {center:{mark:Highlighted text, also centered}}
 
 __//{center:{link:https://github.com/Human-Hummus/Flaarc|Link to the repo, centered, bolded, italicized}}//__
+
+
+{table:table_test.csv}
