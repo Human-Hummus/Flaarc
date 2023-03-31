@@ -148,13 +148,13 @@ diaresis|x$diaresis
 #section Tables
 Tables are a fuction with the following syntax:
 
-\{list:
+\{table:
 item 1a|item 1b
 item 2a|item 2b
 \}
 
 This would produce the following table:
-{list:
+{table:
 item 1a|item 1b
 item 2a|item 2b
 }
