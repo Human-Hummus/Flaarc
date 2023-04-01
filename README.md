@@ -105,6 +105,7 @@ The following is a full list of the default variables and their values.
 
 
 |Variable|Description|
+|---|---|
 |version|current of the parser|
 |year|current year|
 |month|current month|
@@ -168,6 +169,7 @@ item 2a|item 2b
 This would produce the following table:
 
 |item 1a|item 1b|
+|---|---|
 |item 2a|item 2b|
 
 

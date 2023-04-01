@@ -324,7 +324,7 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                     "StartCenter" => { output+="<div style=\"text-align: center\">" }
                     "EndRight" => { output+="</div>" }
                     "EndCenter" => { output+="</div>" }
-                    "StartTable" => {} //do nothing
+                    "StartTable" => {table_row_number=0;} //do nothing
                     "EndTable" => {} //do nothing
                     "StartTableRow" => {
                         if table_row_number == 1{
