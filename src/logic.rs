@@ -181,6 +181,9 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 else if todo == "image"{
                     output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
                 }
+                else if todo == "quote"{
+                    output+=&("#".to_string() + &(todo.to_string() + &(" ".to_string() + &(run_on + "\n"))));
+                }
                 else{
                     println!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &todo);
                     output+="(ILLEGAL HASH FUNCTION)\n";

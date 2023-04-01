@@ -202,6 +202,9 @@ pub fn format_parser(input: &String) -> String{
             else if action == "image"{
                 output+=&("\\STARTIMAGE\\".to_string() + &(argument + "\\ENDIMAGE\\"));
             }
+            else if action == "quote"{
+                output+=&("\\STARTQUOTE\\".to_string() + &(argument + "\\ENDQUOTE\\"));
+            }
             pos+=1;
         }
 
@@ -392,6 +395,12 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDSUBSCRIPT"{
                     output+="</sub>";
                 }
+                else if action == "STARTQUOTE"{
+                    output+="\n>";
+                }
+                else if action == "ENDQUOTE"{
+                    output+="\n"
+                }
 
                 else {
                     println!("failed action: {}", action);
@@ -554,11 +563,37 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDSUBSCRIPT"{ 
                     output+="</sub>";
                 }
+                else if action == "STARTQUOTE"{ 
+                    output+="<blockquote>";
+                }
+                else if action == "ENDQUOTE"{ 
+                    output+="</blockquote>"
+                }
             }
             
         }
         else if chars[pos] == '\n'{ 
             output+="<br>";
+            pos+=1;
+        }
+        else if chars[pos] == '<'{
+            output+="&lt;";
+            pos+=1;
+        }
+        else if chars[pos] == '<'{ 
+            output+="&gt;";
+            pos+=1;
+        }
+        else if chars[pos] == '"'{
+            output+="&quot;";
+            pos+=1;
+        }
+        else if chars[pos] == '\''{
+            output+="&apos;";
+            pos+=1;
+        }   
+        else if chars[pos] == '&'{
+            output+="&amp;";
             pos+=1;
         }
         else{
