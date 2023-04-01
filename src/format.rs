@@ -26,6 +26,7 @@ pub fn format_parser(input: &String) -> String{
     let mut is_paragraph = false;
     let mut is_table_item = false;
     let mut is_table_row = false;
+    let mut is_crossout = false;
 
     while pos < chars.len(){
         if chars[pos] == '_'  && pos < chars.len()-1 && chars[pos+1] == '_'{
@@ -52,6 +53,14 @@ pub fn format_parser(input: &String) -> String{
             flip_bool!(is_superscript);
             pos+=1;
         }
+        else if chars[pos] == '-' && pos+1 < chars.len() && chars[pos+1] == '-'{
+            match is_crossout{
+                true => { output+="\\ENDCROSSOUT\\"; }
+                false => { output+="\\STARTCROSSOUT\\"; }
+            }
+            flip_bool!(is_crossout);
+            pos+=2;
+        }
         else if chars[pos] == '\\'{
             match chars[pos+1]{
                 '\\' => { output+="\\\\"; pos+=2; }
@@ -60,6 +69,7 @@ pub fn format_parser(input: &String) -> String{
                 '/' => { output+="/"; pos+=2; }
                 '}' => { output+="}"; pos+=2; }
                 '#' => { output+="#";  pos+=2; }
+                '-' => { output+="-"; pos+=2; }
                 _ => { output+="\\"; pos+=1; }
             }
         }
@@ -401,6 +411,12 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                 else if action == "ENDQUOTE"{
                     output+="\n"
                 }
+                else if action == "STARTCROSSOUT"{
+                    output+="~~";
+                }
+                else if action == "ENDCROSSOUT"{ 
+                    output+="~~";
+                }
 
                 else {
                     println!("failed action: {}", action);
@@ -568,6 +584,12 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
                 }
                 else if action == "ENDQUOTE"{ 
                     output+="</blockquote>"
+                }
+                else if action == "STARTCROSSOUT"{ 
+                    output+="<del>";
+                }
+                else if action == "ENDCROSSOUT"{  
+                    output+="</del>";
                 }
             }
             

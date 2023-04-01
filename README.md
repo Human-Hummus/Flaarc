@@ -32,6 +32,9 @@ Subscripts are quite diffent, for this you need to use the "sub" function. For e
 
 Highlighting works just like subscripts in that it uses a function, this time the "mark" function. If you want to type "<mark>highlight</mark>", you'd type "{mark:highlight}"
 
+Crossout work more like bold and italics, but instead of "\_\_" or "//", it's "--".
+For example, "--STRIKE--" becomes: "~~STRIKE~~".
+
 
 ##  Hashes
 Hashes are lines that begin with the '\#' symbol. There are a few types of hashes:
@@ -46,6 +49,8 @@ Hashes are lines that begin with the '\#' symbol. There are a few types of hashe
 \#setfont {font} set the font.
 
 \#image {path\_to\_image}, include image in document.
+
+\#quote {text to quote} quote the text
 
 to type a \# on its own, ensure it's preceded by a backslash, like this: \\\#.
 
@@ -65,6 +70,7 @@ There are reserved functions:
 - The link function makes links.
 - The right function aligns the text to the right.
 - The center function aligns the text to the center.
+- The sub function makes the text a subscript.
 ##  Variables
 To declare a variable, you need a "\#" preceded by a newline, immediately proceeded by the text "define", then a space, then the name of the variable, then a space, then the content of the variable, and finally, a newline.
 For example, if you want to declare the variable "x" and set it to contain "this is in x!" you'd type:
@@ -165,3 +171,4 @@ I want to say thank you for showing interest in this hobby project. It's been fu
 - **good** standard library of functions.
 - an optional GUI.
 - support for more advanced styling
+- support for gemtext

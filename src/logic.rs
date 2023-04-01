@@ -92,6 +92,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 '$' =>  {output+="$"}
                 '_' =>  {output+="\\_"}
                 '/' =>  {output+="\\/"}
+                '-' => {output+="\\-"}
                 _ =>    {output+="\\\\";pos-=1;}
             }
             pos+=2;

@@ -15,7 +15,7 @@ Please note that while the format and output files aren't required, as they defa
 
 Some other options include:
 {list:
-	--help / -h:	print help info
+	\--help / -h:	print help info
 	frog:		Don't worry about it.
 }
 
@@ -34,6 +34,9 @@ Superscripts are similar. If you want "x^2^", you would type "x\^2\^".
 Subscripts are quite diffent, for this you need to use the "sub" function. For example, to type "H{sub:2}O", you'd type "H\{sub:2\}O". See the "Functions" section for more details on how functions work.
 
 Highlighting works just like subscripts in that it uses a function, this time the "mark" function. If you want to type "{mark:highlight}", you'd type "\{mark:highlight\}"
+
+Crossout work more like bold and italics, but instead of "\__" or "\//", it's "\--".
+For example, "\--STRIKE\--" becomes: "--STRIKE--".
 
 
 #section Hashes
