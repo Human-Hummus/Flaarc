@@ -28,7 +28,7 @@ For example, to type \_\_, you would type \\\_\_ instead.
 
 Superscripts are similar. If you want "x<sup>2</sup>", you would type "x\\<sup>2\\</sup>".
 
-Subscripts are quite diffent, for this you need to use the "sub" function. For example, to type "H<sub>2</sub>O", you'd type "H{sub:2}O". See the "Functions" section for more details on how functions work.
+Subscripts are quite diffent, for this you need to use the "sub" function. For example, to type "H2</sub>O", you'd type "H{sub:2}O". See the "Functions" section for more details on how functions work.
 
 Highlighting works just like subscripts in that it uses a function, this time the "mark" function. If you want to type "<mark>highlight</mark>", you'd type "{mark:highlight}"
 
