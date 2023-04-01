@@ -16,6 +16,18 @@ Some other options include:
 
 - --help / -h:	print help info
 - frog:		Don't worry about it.
+list of output formats supported.
+
+|format|name in the -f flag|Description|
+|---|---|---|
+|Markdown|markdown|markdown|
+|HTML|html|HTML|
+|Intermediate Representation|IR|Text from the format parser|
+|Text|text|Plain text|
+|Logic|logic|Text from the logical parser|
+
+
+
 ##  Basic Formatting; Italics, Bold, Superscripts, Subscripts, and Highlights.
 Italics can be defined with the text intended to be italicized surrounded by "//".
 For example, "//italic text//" makes "*italic text*"
@@ -92,8 +104,8 @@ Some variables are defined by the parser, **not** the user, however the user can
 The following is a full list of the default variables and their values.
 
 
+|Variable|Description|
 |version|current of the parser|
-|---|---|
 |year|current year|
 |month|current month|
 |day|current day of the month|
@@ -149,6 +161,7 @@ Tables are a fuction with the following syntax:
 
 {table:
 item 1a|item 1b
+
 item 2a|item 2b
 }
 
