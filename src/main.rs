@@ -12,6 +12,11 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub struct DocInfo{
     title: String,
     font: String,
+    bg_color: String,
+    bg_image: String,
+    page_color: String,
+    page_padding: i8, //in integer percentage
+    text_padding: i8, //in integer percentage
 }
 
 

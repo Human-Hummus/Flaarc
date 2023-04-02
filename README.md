@@ -15,7 +15,8 @@ Please note that while the format and output files aren't required, as they defa
 Some other options include:
 
 - --help / -h:	print help info
-- frog:		Don't worry about it.
+- 	frog:		Don't worry about it.
+
 list of output formats supported.
 
 |format|name in the -f flag|Description|
@@ -79,10 +80,11 @@ One way this could be used is if you want to be able to import your name, make a
 There are reserved functions:
 
 - The list function makes lists.
-- The link function makes links.
-- The right function aligns the text to the right.
-- The center function aligns the text to the center.
-- The sub function makes the text a subscript.
+- 	The link function makes links.
+- 	The right function aligns the text to the right.
+- 	The center function aligns the text to the center.
+- 	The sub function makes the text a subscript.
+
 ##  Variables
 To declare a variable, you need a "\#" preceded by a newline, immediately proceeded by the text "define", then a space, then the name of the variable, then a space, then the content of the variable, and finally, a newline.
 For example, if you want to declare the variable "x" and set it to contain "this is in x!" you'd type:
@@ -178,9 +180,13 @@ This would produce the following table:
 ##  Features I want to add/TO DO:
 
 - better installer.
-- windows OS support.
-- web image support.
-- **good** standard library of functions.
-- an optional GUI.
-- support for more advanced styling
-- support for gemtext
+- 	windows OS support.
+- 	web image support.
+- 	**good** standard library of functions.
+- 	an optional GUI.
+- 	support for more advanced styling
+- 	support for gemtext
+- 	include other files that will be parsed and then linked to.
+- 	local links.
+- 	add support for changing BG color/image
+- 	add support for "formatted" html

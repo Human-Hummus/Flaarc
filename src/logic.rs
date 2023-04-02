@@ -64,7 +64,7 @@ fn exec_fn(function: &String, text: &String) -> String{
 // Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does
 // formatting.
 pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<Vec<String>>, DocInfo){
-    let mut docinf = DocInfo {title: "Title".to_string(), font: "times".to_string()};
+    let mut docinf = DocInfo {title: "Title".to_string(), font: "times".to_string(), bg_color: "white".to_string(), bg_image: "".to_string(), page_color: "white".to_string(), page_padding: 5, text_padding: 5};
     let chars:Vec<char> = text.chars().collect();
     let mut output = String::new();
     let mut pos = 0;

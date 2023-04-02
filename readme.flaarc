@@ -189,4 +189,8 @@ item 2a|item 2b
 	an optional GUI.
 	support for more advanced styling
 	support for gemtext
+	include other files that will be parsed and then linked to.
+	local links.
+	add support for changing BG color/image
+	add support for "formatted" html
 }

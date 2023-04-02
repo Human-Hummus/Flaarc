@@ -24,7 +24,6 @@ pub fn format_parser(input: &String) -> String{
     let mut is_bold = false;
     let mut is_italic = false;
     let mut is_superscript = false;
-    let mut is_paragraph = false;
     let mut is_table_item = false;
     let mut is_table_row = false;
     let mut is_crossout = false;
@@ -182,10 +181,7 @@ pub fn format_parser(input: &String) -> String{
             }
 
             else{
-                if pos > 0 && chars[pos-1] == '\n' && is_paragraph{
-                    is_paragraph=false;output+="\\EndParagraph\\";
-                }
-                else{output+="\n";}
+                output+="\n";
                 pos+=1;
             }
         }
@@ -213,14 +209,6 @@ pub fn format_parser(input: &String) -> String{
             pos+=1;
         }
 
-        else if chars[pos] == '\t' && (pos < 1 || chars[pos-1] == '\n'){
-            if is_paragraph{
-                output+="\\EndParagraph\\"
-            }
-            output+="\\StartParagraph\\";
-            is_paragraph = true;
-            pos+=1;
-        }
         else if chars[pos] == '|' && depthinfo.contains(&'t'){
             if is_table_item{
                 flip_bool!(is_table_item);
@@ -245,9 +233,6 @@ pub fn format_parser(input: &String) -> String{
             pos+=1;
         }
         
-    }
-    if is_paragraph{
-        output+="\\EndParagraph\\";
     }
     if is_bold{
         output+="\\EndBold\\";
@@ -299,8 +284,6 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                         output +="- ";
                     }
                     "EndListItem" => {} // do nothing
-                    "StartParagraph" => {} // do nothing
-                    "EndParagraph" => {} //do nothing
                     "StartLink" => {
                         current_link = String::new();
                         while chars[pos] != '\\'{
@@ -373,7 +356,7 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
 
 
 pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
-    let mut output:String = format!("<DOCTYPE! html><html><head><title>{}</title></head><body><h1>{}</h1>", info.title, info.title);
+    let mut output:String = format!("<DOCTYPE! html><html><head><style>body {{box-sizing: border-box; margin:auto; padding: {}%; background-color: {}}}\n:root{{background:{}; padding: {}%}}</style><title>{}</title></head><body><div><h1>{}</h1></div>", info.text_padding, info.page_color, info.bg_color, info.page_padding, info.title, info.title);
     let chars:Vec<char> = text.chars().collect();
     let mut pos = 0;
 
@@ -386,21 +369,21 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
             else{
                 pos+=1;
                 let mut action = String::new();
-                while !"\\:".contains(chars[pos]){
+                while !"\\:\n".contains(chars[pos]){
                     action.push(chars[pos]);
                     pos+=1;
                 }
                 pos+=1;
                 match action.as_str(){
-                    "StartBold" => { output+="<b>" }
-                    "EndBold" => { output+="</b>" }
+                    "StartBold" => { output+="<strong>" }
+                    "EndBold" => { output+="</strong>" }
                     "StartItalic" => { output+="<em>" }
                     "EndItalic" => { output+="</em>" }
                     "StartList" => { output+="<ul>" }
                     "EndList" => { output+="</ul>" }
                     "StartListItem" => { output+="<li>" }
                     "EndListItem" => { output+="</li>" }
-                    "StartParagraph" => { output+= &format!("<p style=\"font-family:\'{}\'\">", info.font) }
+                    //{ output+= &format!("<p style=\"font-family:\'{}\'\">", info.font) }
                     "EndParagraph" => { output+="</p>" }
                     "StartLink" => {
                         let mut link_to = String::new();
