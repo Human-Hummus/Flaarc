@@ -179,6 +179,28 @@ item 1a|item 1b
 item 2a|item 2b
 }
 
+#section Style($cool )
+styles are defined by hashes.
+
+to set the font, use "setfont". For example, to set the page's font to times,
+\#setfont times
+
+to set the background color, use "setbgcolor". For example, to set the background's color to blue,
+\#setbgcolor blue
+
+to set the page's color, use "setpagecolor". For example, to set the page's color to green,
+\#setpagecolor green
+
+to set the page's padding(the gap from the page to the border), use "setpagepadding". For example, to set the page's padding to 3%:
+\#setpagepadding 3
+
+to set the text's padding(the gap from the page's border to the text/content), use "set text padding". For example, to set the text's padding to 5%,
+\#settextpadding 5.
+
+all of these together would produce the following page.
+#image exampleimage.png
+
+
 
 #section Features I want to add/TO DO:
 {list:

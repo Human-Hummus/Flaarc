@@ -145,6 +145,10 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
 
                 "title" => { docinf.title = data }
                 "setfont" => { docinf.font = data }
+                "setbgcolor" => { docinf.bg_color = data }
+                "setpagecolor" => { docinf.page_color = data }
+                "setpagepadding" => { docinf.page_padding = data.parse::<i8>().unwrap() }
+                "settextpadding" => { docinf.text_padding = data.parse::<i8>().unwrap() }
 
                 "section" | "image" | "quote" => { // SKIP THESE; leave them to the format parser
                     output+=&("#".to_string() + &(action.to_string() + &(" ".to_string() + &(data + "\n"))));
@@ -153,6 +157,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                     println!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &action);
                     output+="(ILLEGAL HASH FUNCTION)\n";
                     }
+
             }
         pos+=1;
         }
