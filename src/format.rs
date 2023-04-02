@@ -1,5 +1,6 @@
 use std::fs;
 use crate::DocInfo;
+use std::fmt::format;
 
 macro_rules! flip_bool{
     ($bol:expr) => {
@@ -63,47 +64,46 @@ pub fn format_parser(input: &String) -> String{
         }
         else if chars[pos] == '\\'{
             match chars[pos+1]{
-                '\\' => { output+="\\\\"; pos+=2; }
-                '{' => { output+="{"; pos+=2; }
-                '_' => { output+="_"; pos+=2; }
-                '/' => { output+="/"; pos+=2; }
-                '}' => { output+="}"; pos+=2; }
-                '#' => { output+="#";  pos+=2; }
-                '-' => { output+="-"; pos+=2; }
-                _ => { output+="\\"; pos+=1; }
+                '\\' => { output+="\\\\" }
+                '{' => { output+="{" }
+                '_' => { output+="_" }
+                '/' => { output+="/" }
+                '}' => { output+="}" }
+                '#' => { output+="#" }
+                '-' => { output+="-" }
+                _ => { output+="\\"; pos-=1; }
             }
+            pos+=2;
         }
 
         else if chars[pos] == '{'{
             pos+=1;
             let mut command:String = String::new();
-            while chars[pos] != ':'{ command+=&chars[pos].to_string(); pos+=1; }
+            while chars[pos] != ':'{ command.push(chars[pos]); pos+=1 }
             pos+=1;
-            while chars[pos] == ' ' || chars[pos] == '\n' || chars[pos] == '\t'{ pos+=1; }
+            while " \n\t".contains(chars[pos]) { pos+=1; }
             
             match command.as_str(){
                 "list" => {
                     output+="\\StartList\\";
-                    let mut new_item_follows = false;
                     let mut x = pos;
                     while chars[x] != '}' && chars[x] != '\n'{
-                        if chars[x] != ' ' && chars[x] != '\n' && chars[x] != '\t'{ new_item_follows = true; break; }
+                        if !" \n\t".contains(chars[x]) { output+="\\StartListItem\\"; break }
                         x+=1;
                     }
-                    if new_item_follows { output+="\\StartListItem\\"; }
                     depthinfo.push('l');//l is for link
                 }
 
                 "link" => {
                     let mut link_address = String::new();
-                    while chars[pos] != '|' && chars[pos] != '}'{
-                        link_address+=&chars[pos].to_string();
+                    while !"|}".contains(chars[pos]) {
+                        link_address.push(chars[pos]);
                         pos+=1;
                     }
-                    output+=&("\\StartLink:".to_owned() + &(link_address.clone() + "\\"));
+                    output+= &format!("\\StartLink:{}\\", link_address.clone());
         
-                    if chars[pos] != '}'{ depthinfo.push('u'); }//U is for Url.
-                    else{ output+=&(link_address + "\\EndLink\\"); }
+                    if chars[pos] != '}'{ depthinfo.push('u') } //U is for Url.
+                    else{ output+= &format!("{}\\EndLink\\", link_address); }
                     pos+=1;
                 }
 
@@ -159,19 +159,14 @@ pub fn format_parser(input: &String) -> String{
         else if chars[pos] == '\n'{
             if depthinfo.contains(&'l'){
                 output+="\\EndListItem\\";
-                let mut new_item_follows = false;
                 let mut temp_pos = pos+1;
                 while chars[temp_pos] != '}'{
-                    if chars[temp_pos] != ' ' && chars[temp_pos] != '\n' && chars[temp_pos] != '\t'{
-                        new_item_follows = true;
+                    if !" \n\t".contains(chars[temp_pos]){
+                        output+="\\StartListItem\\";
                         break;
                     }
                     temp_pos+=1;
                 }
-                if new_item_follows{
-                    output+="\\StartListItem\\";
-                }
-
                 pos+=1;
             }
             else if depthinfo.contains(&'t'){
@@ -200,20 +195,20 @@ pub fn format_parser(input: &String) -> String{
             let mut argument = String::new();
             pos+=1;
 
-            while pos < chars.len() && chars[pos] != ' ' && chars[pos] != '\n'{
-                action+=&chars[pos].to_string(); pos+=1;
+            while pos < chars.len() && !" \n".contains(chars[pos]){
+                action.push(chars[pos]); pos+=1;
             }
             while pos < chars.len() && chars[pos] != '\n'{ 
-                argument+=&chars[pos].to_string(); pos+=1;
+                argument.push(chars[pos]); pos+=1;
             }
             if action == "section"{
-                output+=&("\\Section\\".to_string() + &(argument + "\\EndSection\\"));
+                output+= &format!("\\Section\\{}\\EndSection\\", argument);
             }
             else if action == "image"{
-                output+=&("\\StartImage\\".to_string() + &(argument + "\\EndImage\\"));
+                output+= &format!("\\StartImage\\{}\\EndImage\\", argument);
             }
             else if action == "quote"{
-                output+=&("\\StartQuote\\".to_string() + &(argument + "\\EndQuote\\"));
+                output+= &format!("\\StartQuote\\{}\\EndQuote\\", argument);
             }
             pos+=1;
         }
@@ -246,7 +241,7 @@ pub fn format_parser(input: &String) -> String{
                 }
                 
             }
-            output+=&chars[pos].to_string();
+            output.push(chars[pos]);
             pos+=1;
         }
         
@@ -267,7 +262,7 @@ pub fn format_parser(input: &String) -> String{
 
 
 pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
-    let mut output = "# ".to_string() + &info.title;
+    let mut output = format!("# {}", info.title);
     let mut pos = 0;
     let chars:Vec<char> = text.chars().collect();
     let mut current_link = String::new();
@@ -276,23 +271,22 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
     let mut row_items_number = 0;
     
     while pos < chars.len() {
-        //println!("{}, {}", chars[pos], pos);
         if chars[pos] == '\\'{
-            if chars[pos+1] == '\\'{
+            if pos < chars.len()-1 && chars[pos+1] == '\\'{
                 output+="\\\\";
                 pos+=2
             }
             else{
                 let mut action = String::new();
                 pos+=1;
-                while pos < chars.len() && chars[pos] != '\\' && chars[pos] != ':'{
-                    action+=&chars[pos].to_string();
+                while pos < chars.len() && !"\\:".contains(chars[pos]){
+                    action.push(chars[pos]);
                     pos+=1;
                 }
                 pos+=1;
                 match action.as_str(){
-                    "StartBold" => {output+="**" }
-                    "EndBold" => {output+="**" }
+                    "StartBold" => { output+="**" }
+                    "EndBold" => { output+="**" }
                     "StartItalic" => { output+="*" }
                     "EndItalic" => { output+="*" }
                     "StartList" => { list_depth+=1 }
@@ -310,12 +304,12 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
                     "StartLink" => {
                         current_link = String::new();
                         while chars[pos] != '\\'{
-                            current_link+=&chars[pos].to_string();pos+=1;
+                            current_link.push(chars[pos]);pos+=1;
                         }
                         pos+=1;
                         output+="[";
                     }
-                    "EndLink" => { output+=&("](".to_owned() + &(current_link.clone() + ")")) }
+                    "EndLink" => { output+= &format!("]({})", current_link) }
                     "Section" => { output+="## " }
                     "EndSection" => { output+="\n" }
                     "StartImage" => { output+="![image](" }
@@ -368,7 +362,7 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
             _ => {}
         }pos+=1}
         else{
-            output += &chars[pos].to_string();
+            output.push(chars[pos]);
             pos+=1;
         }
 
@@ -379,23 +373,21 @@ pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
 
 
 pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
-    let mut output = "<!DOCTYPE html><html>".to_string();
-    output+=&("<head><title>".to_owned() + &(info.title.clone() + "</title></head>"));
-    output += &("<body><h1>".to_owned() + &(info.title + "</h1>"));
+    let mut output:String = format!("<DOCTYPE! html><html><head><title>{}</title></head><body><h1>{}</h1>", info.title, info.title);
     let chars:Vec<char> = text.chars().collect();
     let mut pos = 0;
 
     while pos < chars.len(){
         if chars[pos] == '\\'{
-            if chars[pos+1] == '\\'{
+            if pos < chars.len()-1 && chars[pos+1] == '\\'{
                 output+="\\";
                 pos+=2;
             }
             else{
                 pos+=1;
                 let mut action = String::new();
-                while chars[pos] != '\\' && chars[pos] != ':'{
-                    action+=&chars[pos].to_string();
+                while !"\\:".contains(chars[pos]){
+                    action.push(chars[pos]);
                     pos+=1;
                 }
                 pos+=1;
@@ -408,16 +400,16 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
                     "EndList" => { output+="</ul>" }
                     "StartListItem" => { output+="<li>" }
                     "EndListItem" => { output+="</li>" }
-                    "StartParagraph" => { output+=&("<p style=\"font-family:\'".to_owned() + &(info.font.clone() + "\'\">")) }
+                    "StartParagraph" => { output+= &format!("<p style=\"font-family:\'{}\'\">", info.font) }
                     "EndParagraph" => { output+="</p>" }
                     "StartLink" => {
                         let mut link_to = String::new();
-                        while chars[pos] != '\\'{
-                            link_to+=&chars[pos].to_string();
+                        while pos < chars.len() && chars[pos] != '\\'{
+                            link_to.push(chars[pos]);
                             pos+=1;
                         }
                         pos+=1;
-                        output+=&("<a href=\"".to_owned() + &(link_to + "\">"));
+                        output+=&format!("<a href=\"{}\">", link_to);
                     }
                     "EndLink" => { output+="</a>" }
                     "Section" => { output+="<h2>" }
@@ -459,7 +451,7 @@ pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
             _ => {}
         }pos+=1}
         else{
-            output+=&chars[pos].to_string();
+            output.push(chars[pos]);
             pos+=1;
         }
     }
@@ -478,15 +470,15 @@ pub fn text_parser(text: &String, output_file: &String, info: DocInfo){
 
     while pos < chars.len(){
         if chars[pos] == '\\'{
-            if chars[pos+1] == '\\'{
+            if pos < chars.len()-1 && chars[pos+1] == '\\'{
                 output+="\\";
                 pos+=2;
             }
             else{
                 pos+=1;
                 let mut action = String::new();
-                while chars[pos] != '\\'{
-                    action+=&chars[pos].to_string();
+                while pos < chars.len() && chars[pos] != '\\'{
+                    action.push(chars[pos]);
                     pos+=1;
                 }
                 pos+=1;
@@ -511,11 +503,11 @@ pub fn text_parser(text: &String, output_file: &String, info: DocInfo){
                     "StartLink" => {
                         let mut link = String::new();
                         while chars[pos] != '\\'{
-                            link +=&chars[pos].to_string();
+                            link.push(chars[pos]);
                             pos+=1;
                         }
                         pos+=1;
-                        output+=&("(LINK: \"".to_string() + &(link + "\" Text: "));
+                        output+=&format!("(LINK: \"{}\" Text: ", link);
                     }
                     "EndLink" => { output+=")" }
                     "Section" => { output+="=========================\n" }
@@ -533,7 +525,7 @@ pub fn text_parser(text: &String, output_file: &String, info: DocInfo){
             
         }
         else{
-            output+=&chars[pos].to_string();
+            output.push(chars[pos]);
             pos+=1;
         }
     }

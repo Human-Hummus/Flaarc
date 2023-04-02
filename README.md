@@ -89,6 +89,7 @@ For example, if you want to declare the variable "x" and set it to contain "this
 
 \#define x this is in x!
 
+
 To use a variable within text, type the variable's name preceded by a '$', and proceded by a space. Note that the space will be ignored, if you want a space after a variable, type two spaces.
 To access the contents of x, we could say:
 
@@ -97,6 +98,7 @@ This will be converted to:
 I've set the variable x to "this is in x!".
 
 Note how the space following $x is present *before* parsing, but not after.
+
 
 
 Some variables are defined by the parser, **not** the user, however the user can redefine them as they please.
@@ -171,11 +173,6 @@ This would produce the following table:
 |item 1a|item 1b|
 |---|---|
 |item 2a|item 2b|
-
-
-
-##  Thank you.
-I want to say thank you for showing interest in this hobby project. It's been fun for me, and I hope you'll have fun too.
 
 
 ##  Features I want to add/TO DO:
