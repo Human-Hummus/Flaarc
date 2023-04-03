@@ -7,7 +7,6 @@ use std::fs;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-
 //general information about the document
 pub struct DocInfo{
     title: String,

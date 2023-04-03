@@ -213,6 +213,6 @@ all of these together would produce the following page.
 	support for gemtext
 	include other files that will be parsed and then linked to.
 	local links.
-	add support for changing BG color/image
-	add support for "formatted" html
+	add support for colored text html
+	paragraph function
 }
