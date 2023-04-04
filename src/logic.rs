@@ -1,6 +1,8 @@
 use std::fs;
 use std::process::Command;
 use crate::DocInfo;
+use crate::Document;
+use crate::default_docinfo;
 
 
 pub fn read_file(filename:&String) -> String{
@@ -45,6 +47,28 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
     return (String::from("(ERROR; VAR NOT FOUND)"), pos);
 }
 
+fn setnewdocinf(filename: &String, docinf: DocInfo, mut document: Document) -> Document{
+    let mut x = 0;
+    while x < document.files.len(){
+        if &document.files[x].filename == filename{
+            document.files[x] = docinf;
+            return document;
+        }
+        x+=1;
+    }
+    return document; //do nothing on failure.
+}
+
+fn is_parsed_file(document: &Document, filename: &String) -> bool{
+    for item in document.files.iter(){
+        if &item.filename == filename{
+            return true;
+        }
+    }
+    return false;
+}
+
+
 //run a function.
 fn exec_fn(function: &String, text: &String) -> String{
     return String::from_utf8_lossy(&Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().unwrap_or_else(|_error|{
@@ -53,6 +77,17 @@ fn exec_fn(function: &String, text: &String) -> String{
     }).stdout).to_string();
 }
 
+fn getdpos(document: &Document, filename: &String) -> usize{
+    let mut x = 0;
+    while x < document.files.len(){
+        if &document.files[x].filename == filename{
+            return x;
+        }
+        x+=1;
+    }
+    return 0;
+
+}
 
 // This is the Logical Parser. It's a seperate entity from the Formatting Parser due to technical
 // reasons. It's job is to take in text and find:
@@ -63,8 +98,7 @@ fn exec_fn(function: &String, text: &String) -> String{
 //
 // Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does
 // formatting.
-pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<Vec<String>>, DocInfo){
-    let mut docinf = DocInfo {title: "Title".to_string(), font: "times".to_string(), bg_color: "white".to_string(), bg_image: "".to_string(), page_color: "white".to_string(), page_padding: 5, text_padding: 5};
+pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo) -> (String, Document, DocInfo){
     let chars:Vec<char> = text.chars().collect();
     let mut output = String::new();
     let mut pos = 0;
@@ -114,9 +148,11 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                     while x < variable_def_chars.len() && " \t\n".contains(variable_def_chars[x]) {x+=1;} //skip whitespace; find the first char of interest.
                 
                     for chr in x..variable_def_chars.len(){ variable_content.push(variable_def_chars[chr]) } // read the contents of the var.
-                    let tmp = logical_parser(&variable_content, vars);
+
+                    let tmp = logical_parser(&variable_content, document, docinf);
                     variable_content = tmp.0;
-                    vars = tmp.1;
+                    document = tmp.1;
+                    docinf = tmp.2;
 
 
                     //making this part a loop so that instead of exiting the program, we can break out
@@ -128,19 +164,20 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                     }
 
                     //find if (and where) the var is in the vars list.
-                    for var_number in 0..vars.len(){
-                        if vars[var_number][0] == variable_name{
-                            vars[var_number][1] = variable_content; continue 'mainloop;
+                    for var_number in 0..document.vars.len(){
+                        if document.vars[var_number][0] == variable_name{
+                            document.vars[var_number][1] = variable_content; continue 'mainloop;
                         }
                     }
-                    vars.push(vec![variable_name, variable_content]); //this runs if the var WASN'T found.
+                    document.vars.push(vec![variable_name, variable_content]); //this runs if the var WASN'T found.
                 }
 
                 "include" | "import" | "use" => {
                     //HOLY SHIT!!!!!!1!!!!!!11!! IT'S FUCKING RECURSIVVVVE!!!!!!
-                    let tmp = logical_parser(&read_file(&data), vars);
+                    let tmp = logical_parser(&read_file(&data), document, docinf);
                     output+=&tmp.0;
-                    vars = tmp.1;
+                    document = tmp.1;
+                    docinf = tmp.2;
                 }
 
                 "title" => { docinf.title = data }
@@ -153,6 +190,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                 "section" | "image" | "quote" => { // SKIP THESE; leave them to the format parser
                     output+=&("#".to_string() + &(action.to_string() + &(" ".to_string() + &(data + "\n"))));
                 }
+
                 _ => {
                     println!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &action);
                     output+="(ILLEGAL HASH FUNCTION)\n";
@@ -162,7 +200,7 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
         pos+=1;
         }
         else if chars[pos] == '$'{
-            let tmp = get_var(&text, &vars, pos);
+            let tmp = get_var(&text, &document.vars, pos);
             output += &tmp.0;
             pos = tmp.1;
         }
@@ -182,6 +220,43 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
             if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table"{
                 output+="{";
                 pos = prevpos+1;
+            }
+            else if function == "point"{
+                //this is a pain to do.
+                let mut filename = String::new();
+                let mut linkname = String::new();
+                //get filename
+                while chars[pos] != '|' && chars[pos] != '}'{
+                    filename.push(chars[pos]);
+                    pos+=1;
+                }
+                pos+=1;
+                //try to get linkname
+                while chars[pos] != '}'{
+                    linkname.push(chars[pos]);
+                    pos+=1;
+                }
+                if linkname == "".to_string(){
+                    linkname = filename.clone();
+                }
+
+
+                if !is_parsed_file(&document, &filename){
+                    //build docinf struct
+                    let mut newdocinf = default_docinfo(filename.clone(), &document.format);
+                    //append the docinf to the document
+                    document.files.push(default_docinfo(filename.clone(), &document.format));
+                    //pass to logic parser
+                    let tmp = logical_parser(&read_file(&filename), document, newdocinf);
+                    document = tmp.1;
+                    newdocinf = tmp.2;
+                    newdocinf.content = tmp.0;
+                    document = setnewdocinf(&filename, newdocinf, document);
+                }
+                output+=&format!("{}link:{}|{}{}", '{', document.files[getdpos(&document, &filename)].outfilename, linkname, '}');
+                println!("{}, {}", &docinf.filename, &format!("{}link:{}|{}{}", '{', document.files[getdpos(&document, &filename)].outfilename, linkname, '}'));
+                pos+=1; 
+                
             }
             else{
                 loop{
@@ -218,13 +293,15 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
                         pos+=1;
                     }
                 }
-                let parsed_input = logical_parser(&input, vars);
-                vars = parsed_input.1;
+                let parsed_input = logical_parser(&input, document, docinf);
+                document = parsed_input.1;
+                docinf = parsed_input.2;
 
                 let executed = exec_fn(&function, &parsed_input.0);
-                let parsed_exec = logical_parser(&executed, vars);
-                vars = parsed_exec.1;
+                let parsed_exec = logical_parser(&executed, document, docinf);
                 output+=&parsed_exec.0;
+                document = parsed_exec.1;
+                docinf = parsed_exec.2;
             }
         }
         else if chars[pos] == '#'{
@@ -237,5 +314,6 @@ pub fn logical_parser(text: &String, mut vars:Vec<Vec<String>>) -> (String, Vec<
         }
     }
 
-    return (output, vars, docinf);
+    docinf.content = output.clone();
+    return (output, document, docinf);
 }

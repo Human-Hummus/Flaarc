@@ -7,6 +7,13 @@ use std::fs;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+pub struct Document{
+    files: Vec<DocInfo>,
+    format: String,
+    vars: Vec<Vec<String>>
+}
+
+
 //general information about the document
 pub struct DocInfo{
     title: String,
@@ -16,6 +23,53 @@ pub struct DocInfo{
     page_color: String,
     page_padding: i8, //in integer percentage
     text_padding: i8, //in integer percentage
+
+    filename: String,
+    content: String,
+    outfilename: String
+}
+
+impl DocInfo{
+    fn clone(&self) -> DocInfo{
+        return DocInfo {
+            title: self.title.clone(),
+            font: self.font.clone(),
+            bg_color: self.bg_color.clone(),
+            bg_image: self.bg_image.clone(),
+            page_color: self.page_color.clone(),
+            page_padding: self.page_padding,
+            text_padding: self.text_padding,
+            filename: self.filename.clone(),
+            content: self.content.clone(),
+            outfilename: self.outfilename.clone()
+        }
+    }
+}
+
+fn default_docinfo(filename: String, format: &String) -> DocInfo{
+    let mut tmp = DocInfo{
+        title: "Title".to_string(),
+        font: "times".to_string(),
+        bg_color: "white".to_string(),
+        bg_image: "".to_string(),
+        page_color: "white".to_string(),
+        page_padding: 5,
+        text_padding: 0,
+        filename: filename.clone(),
+        content: "".to_string(),
+        outfilename: filename,
+    };
+    if format == "markdown"{
+        tmp.outfilename += ".md";
+    }
+    else if format == "text"{ 
+        tmp.outfilename += ".txt";
+    }
+    else{
+        tmp.outfilename += "";
+    }
+    return tmp;
+
 }
 
 
@@ -80,17 +134,15 @@ pub fn std_vars() -> Vec<Vec<String>>{
 }
 
 fn main() {
-    let frog = include_str!("sexy frog.txt");
-    let help = include_str!("help info.txt");
-    let mut infile = "".to_string();    
-    let mut outfile = "out.md".to_string();
-    let mut format = "markdown".to_string();
+    let mut infile = "".to_string(); 
+    let mut outfile = "output.html".to_string();
+    let mut format = "html".to_string();
     let args: Vec<_> = env::args().collect();
     
     let mut x = 1;
     while x < args.len(){
         if args[x] == "-h" ||args[x] == "--help"{
-            println!("{}", help);
+            println!("{}", include_str!("help info.txt"));
             std::process::exit(0);
         }
         else if args[x] == "-o" || args[x] == "--output"{
@@ -98,7 +150,7 @@ fn main() {
             x+=2;
         }
         else if args[x] == "frog" || args[x] == "--frog"{
-            println!("{frog}");
+            println!("{}", include_str!("sexy frog.txt"));
             println!("It's not what it looks like... I swear...");
             std::process::exit(69);
         }
@@ -122,28 +174,42 @@ fn main() {
         println!("Error: no input file specified.");
         std::process::exit(1);
     }
+    let mut document = Document {vars: std_vars(), files: vec![default_docinfo(infile.clone(), &format)], format: format};
+    document.files[0].outfilename = outfile;
 
     let file_content = logic::read_file(&infile);
-    let logical_parser_output = logic::logical_parser(&file_content, std_vars());
-    //println!("lp: {logical_parser_output}");
-    //println!("\n\n\n\n\n\n\n\n\n");
-    let format_parser_output = format::format_parser(&logical_parser_output.0);
-    //println!("IR: {format_parser_output}");
+    let df0 = document.files[0].clone();
+    let logical_parser_output = logic::logical_parser(&file_content, document, df0);
+    document = logical_parser_output.1;
+    document.files[0] = logical_parser_output.2;
 
-    if format == "markdown"{
-        format::markdown_parser(&format_parser_output, &outfile, logical_parser_output.2);
+    let mut x = 0;
+
+    while x < document.files.len(){
+        fmt_file(document.files[x].clone(), &document.format);
+        x+=1;
+    }
+
+}
+
+
+fn fmt_file(file: DocInfo, format: &String){
+    println!("exporting {} to {} with {}", &file.filename, &file.outfilename, &file.content);
+    let format_parser_output = format::format_parser(&file.content);
+    if format == "markdown"{                                                                                           
+        format::markdown_parser(&format_parser_output, &file.outfilename, file.clone());
     }
     else if format == "IR"{
-        fs::write(outfile, format_parser_output + &("\n::::::::::\nTITLE:".to_owned() + &logical_parser_output.2.title)).expect("File system error.");
+        fs::write(file.outfilename, format_parser_output + &("\n::::::::::\nTITLE:".to_owned() + &file.title)).expect("File system error.");
     }
     else if format == "HTML" || format == "html"{
-        format::html_parser(&format_parser_output, &outfile, logical_parser_output.2);
+        format::html_parser(&format_parser_output, &file.outfilename, file.clone());
     }
     else if format == "text"{
-        format::text_parser(&format_parser_output, &outfile, logical_parser_output.2);
+        format::text_parser(&format_parser_output, &file.outfilename, file.clone());
     }
     else if format == "logic"{
-        fs::write(outfile, logical_parser_output.0).expect("File System error");
+        fs::write(file.outfilename, file.content).expect("File System error");
     }
     else{
         println!("error: unknown format");

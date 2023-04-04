@@ -196,6 +196,21 @@ to set the text's padding(the gap from the page's border to the text/content), u
 
 all of these together would produce the following page.
 ![image]( exampleimage.png)
+##  pointing to other files.
+if you want Flaarc to make multiple output files, use the "point" function.
+say you've got 2 files:
+
+
+- file 1.flaarc
+- file 2.flaarc
+
+if you want "file 1.flaarc" to contain a link to file 2.flaarc, you would write "{point:file 2.flaarc}" in "file 1.flaarc". then, when you compile, you'll see the following output files if you use html</sub>
+
+
+- file 1.flaarc.html
+- file 2.flaarc.html
+
+There will be a link in "file 1.flaarc.html" to "file 2.flaarc.html". the syntax of these links work the same as standard links.
 
 
 ##  Features I want to add/TO DO:
@@ -209,5 +224,5 @@ all of these together would produce the following page.
 - 	support for gemtext
 - 	include other files that will be parsed and then linked to.
 - 	local links.
-- 	add support for changing BG color/image
-- 	add support for "formatted" html
+- 	add support for colored text html
+- 	paragraph function
