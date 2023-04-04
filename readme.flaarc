@@ -7,7 +7,7 @@ want to use Markdown, because it'd lack many features present in Latex. Flaarc i
 resembles normal text as little as possible, that way when you don't need the features, you don't have them, but when
 you do, they're fairly easy to use. Does this mean you should use it? Probably not, at least not yet. As it is
 //very// much __alpha quality__, I wouldn't recommend it for anything remotely serious. As a fun thing to try? Sure.
-If you __do__ want something more "serious", I'd engourage you to check out //{link:https://github.com/gohugoio/hugo|Hugo}//, as it's not just a fun project made by some kid online.
+If you __do__ want something more "serious", I'd engourage you to check out // {link:https://github.com/gohugoio/hugo|hugo}//, as it's not just a fun project made by some kid online.
 }
 
 #section Using It From The CLI

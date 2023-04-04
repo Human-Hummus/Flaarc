@@ -216,10 +216,12 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 function+=&chars[pos].to_string();
                 pos+=1;
             }
+            println!("fn: {}", function);
             pos +=1;
             if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table"{
                 output+="{";
                 pos = prevpos+1;
+                println!("skfn: {}", function);
             }
             else if function == "point"{
                 //this is a pain to do.
@@ -281,10 +283,12 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                         }
                     }
                     else if chars[pos] == '{'{
+                        input+="{";
                         depth+=1;
                         pos+=1;
                     }
                     else if chars[pos] == '}'{
+                        input+="}";
                         depth-=1;
                         pos+=1;
                     }
