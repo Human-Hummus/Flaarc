@@ -3,6 +3,8 @@ CCOMPILER = gcc -O3
 
 flaarc:target/release/flaarc funcs
 	cp target/release/flaarc /bin/flaarc
+	flaarc -i readme.flaarc -o README.md -f markdown
+	flaarc -i readme.flaarc -o "src/help info.txt" -f text 
 
 target/release/flaarc: Cargo.toml src/*
 	cargo build --release

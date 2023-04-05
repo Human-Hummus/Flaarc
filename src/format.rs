@@ -507,6 +507,12 @@ pub fn text_parser(text: &String, output_file: &String, info: DocInfo){
                     "EndCenter" => {output+="</div>"}
                     "Startmark" => {output+="<mark>"}
                     "EndMark" => {output+="</mark>"}
+                    "StartTable" => {output+="\n"}
+                    "EndTable" => {output+="\n"}
+                    "StartTableRow" => {output+=""}
+                    "EndTableRow" => {output+="\n"}
+                    "StartTableItem" => {output+="\t"}
+                    "EndTableItem" => {output+="|"}
                     _ => {}
                 }
 

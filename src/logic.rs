@@ -40,6 +40,7 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
             
     for var in vars{ 
         if var_name == var[0]{
+            println!("{}; {}", var[0], var[1]);
             return (var[1].clone(), pos);
         }
     }
@@ -99,6 +100,7 @@ fn getdpos(document: &Document, filename: &String) -> usize{
 // Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does
 // formatting.
 pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo) -> (String, Document, DocInfo){
+    println!("NEWITER: {}", text);
     let chars:Vec<char> = text.chars().collect();
     let mut output = String::new();
     let mut pos = 0;
@@ -188,6 +190,10 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 "settextpadding" => { docinf.text_padding = data.parse::<i8>().unwrap() }
 
                 "section" | "image" | "quote" => { // SKIP THESE; leave them to the format parser
+                    let tmp = logical_parser(&data, document, docinf);
+                    data = tmp.0;
+                    document = tmp.1;
+                    docinf = tmp.2;
                     output+=&("#".to_string() + &(action.to_string() + &(" ".to_string() + &(data + "\n"))));
                 }
 
