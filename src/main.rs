@@ -65,6 +65,9 @@ fn default_docinfo(filename: String, format: &String) -> DocInfo{
     else if format == "text"{ 
         tmp.outfilename += ".txt";
     }
+    else if format == "html"{
+        tmp.outfilename+=".html";
+    }
     else{
         tmp.outfilename += "";
     }
@@ -186,16 +189,16 @@ fn main() {
     let mut x = 0;
 
     while x < document.files.len(){
-        fmt_file(document.files[x].clone(), &document.format);
+        fmt_file(document.files[x].clone(), &document.format, &document);
         x+=1;
     }
 
 }
 
 
-fn fmt_file(file: DocInfo, format: &String){
+fn fmt_file(file: DocInfo, format: &String, document: &Document){
     println!("exporting {} to {} with {}", &file.filename, &file.outfilename, &file.content);
-    let format_parser_output = format::format_parser(&file.content);
+    let format_parser_output = format::format_parser(&file.content, document);
     if format == "markdown"{                                                                                           
         format::markdown_parser(&format_parser_output, &file.outfilename, file.clone());
     }

@@ -233,8 +233,5 @@ There will be a link in "file 1.flaarc.html" to "file 2.flaarc.html". the syntax
 	an optional GUI.
 	support for more advanced styling
 	support for gemtext
-	include other files that will be parsed and then linked to.
-	local links.
 	add support for colored text html
-	paragraph function
 }

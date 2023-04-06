@@ -1,6 +1,7 @@
 use std::fs;
 use crate::DocInfo;
 use std::fmt::format;
+use crate::Document;
 
 macro_rules! flip_bool{
     ($bol:expr) => {
@@ -13,9 +14,20 @@ macro_rules! flip_bool{
     }
 }
 
+pub fn get_outfname(document: &Document, filename: &String) -> usize{
+    let mut x = 0;
+    while x < document.files.len(){
+        if filename == &document.files[x].filename{
+            return x;
+        }
+        x+=1;
+    }
+    return 0; // upon failure, return the index page.
+}
+
 
 //parses the... format; generate IR in order to make it easier to parse later to generate HTML, md, etc.
-pub fn format_parser(input: &String) -> String{
+pub fn format_parser(input: &String, doc:&Document) -> String{
     println!("input: {}", input);
     let mut output = String::new();
     let chars:Vec<char> = input.chars().collect();
@@ -92,6 +104,22 @@ pub fn format_parser(input: &String) -> String{
                         x+=1;
                     }
                     depthinfo.push('l');//l is for link
+                }
+                "filelink" => {
+                    let mut filename = String::new();
+                    let mut linkname = String::new();
+                    while chars[pos] != '|'{
+                        filename.push(chars[pos]);
+                        pos+=1;
+                    }
+                    pos+=1;
+                    while chars[pos] != '}'{
+                        linkname.push(chars[pos]);
+                        pos+=1;
+                    }
+                    pos+=1;
+                    output+=&format!("\\StartLink:{}\\{}\\EndLink\\", doc.files[get_outfname(doc, &filename)].outfilename, linkname);
+
                 }
 
                 "link" => {

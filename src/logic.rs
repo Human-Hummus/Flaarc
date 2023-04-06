@@ -261,7 +261,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                     newdocinf.content = tmp.0;
                     document = setnewdocinf(&filename, newdocinf, document);
                 }
-                output+=&format!("{}link:{}|{}{}", '{', document.files[getdpos(&document, &filename)].outfilename, linkname, '}');
+                output+=&format!("{{filelink:{}|{}}}", filename, linkname); //the format parser will find the output filename
                 println!("{}, {}", &docinf.filename, &format!("{}link:{}|{}{}", '{', document.files[getdpos(&document, &filename)].outfilename, linkname, '}'));
                 pos+=1; 
                 
