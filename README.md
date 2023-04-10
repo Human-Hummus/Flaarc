@@ -2,7 +2,6 @@
 ##  What is it; Why should I use it?
  I made this project because I was unhappy with Latex, as it's tough to write short documents in it, but I also didn't want to use Markdown, because it'd lack many features present in Latex. Flaarc is supposed to have a syntax that resembles normal text as little as possible, that way when you don't need the features, you don't have them, but when you do, they're fairly easy to use. Does this mean you should use it? Probably not, at least not yet. As it is *very* much **alpha quality**, I wouldn't recommend it for anything remotely serious. As a fun thing to try? Sure. If you **do** want something more "serious",  I'd engourage you to check out [hugo](https://github.com/gohugoio/hugo),  as it's not just a fun project made by some kid online. 
 
-
 ##  Using It From The CLI
 The basic syntax is as follows:
 (path to flaarc bin) -i (input file) -f (format) -o (output file)
