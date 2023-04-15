@@ -46,6 +46,33 @@ impl DocInfo{
     }
 }
 
+fn switch_filename(current_filename: &String, new_ex: &String) -> String{
+    let text:Vec<char> = current_filename.chars().collect();
+    let mut number_of_dots = 0;
+    let mut x = 0;
+    while x < text.len(){
+        if text[x] == '.'{number_of_dots+=1}
+        x+=1;
+    }
+    
+    if number_of_dots == 0 {return current_filename.to_string() + new_ex;}
+    x-=1;
+
+    while text[x] != '.'{
+        x-=1;
+    }
+
+    let mut out = String::new();
+    let mut y = 0;
+    while y<x{
+        out.push(text[y]);
+        y+=1;
+    }
+
+    return out + new_ex;
+
+}
+
 fn default_docinfo(filename: String, format: &String) -> DocInfo{
     let mut tmp = DocInfo{
         title: "Title".to_string(),
@@ -57,19 +84,16 @@ fn default_docinfo(filename: String, format: &String) -> DocInfo{
         text_padding: 0,
         filename: filename.clone(),
         content: "".to_string(),
-        outfilename: filename,
+        outfilename: filename.clone(),
     };
     if format == "markdown"{
-        tmp.outfilename += ".md";
+        tmp.outfilename = switch_filename(&filename, &".md".to_string());
     }
     else if format == "text"{ 
-        tmp.outfilename += ".txt";
+        tmp.outfilename = switch_filename(&filename, &".txt".to_string());
     }
     else if format == "html"{
-        tmp.outfilename+=".html";
-    }
-    else{
-        tmp.outfilename += "";
+        tmp.outfilename = switch_filename(&filename, &".html".to_string());
     }
     return tmp;
 
