@@ -2,6 +2,7 @@ use std::fs;
 use crate::DocInfo;
 use std::fmt::format;
 use crate::Document;
+use crate::*;
 
 macro_rules! flip_bool{
     ($bol:expr) => {
@@ -28,7 +29,7 @@ pub fn get_outfname(document: &Document, filename: &String) -> usize{
 
 //parses the... format; generate IR in order to make it easier to parse later to generate HTML, md, etc.
 pub fn format_parser(input: &String, doc:&Document) -> String{
-    println!("input: {}", input);
+    debug!(format!("input: {}", input));
     let mut output = String::new();
     let chars:Vec<char> = input.chars().collect();
     let mut pos = 0;
@@ -164,7 +165,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
         }
         else if chars[pos] == '}'{
             if !(depthinfo.len() > 0){
-                println!("warning: unhandled \"}}\"");
+                warn!("warning: unhandled \"}}\"");
                 pos+=1;
                 continue;
             }

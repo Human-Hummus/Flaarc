@@ -4,6 +4,9 @@ use chrono::Datelike;
 use std::env;
 mod format;
 use std::fs;
+extern crate termion;
+#[macro_use]
+pub mod output;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -165,11 +168,11 @@ fn main() {
     let mut outfile = "output.html".to_string();
     let mut format = "html".to_string();
     let args: Vec<_> = env::args().collect();
-    
+
     let mut x = 1;
     while x < args.len(){
         if args[x] == "-h" ||args[x] == "--help"{
-            println!("{}", include_str!("help info.txt"));
+            alert!(include_str!("help info.txt"));
             std::process::exit(0);
         }
         else if args[x] == "-o" || args[x] == "--output"{
@@ -177,8 +180,8 @@ fn main() {
             x+=2;
         }
         else if args[x] == "frog" || args[x] == "--frog"{
-            println!("{}", include_str!("sexy frog.txt"));
-            println!("It's not what it looks like... I swear...");
+            alert!(include_str!("sexy frog.txt"));
+            alert!("It's not what it looks like... I swear...");
             std::process::exit(69);
         }
         else if args[x] == "-f" ||  args[x] == "--format"{
@@ -190,16 +193,14 @@ fn main() {
             x+=2;
         }
         else{
-            println!("ERROR: Unknown argument \"{}\"", args[x]);
-            std::process::exit(1);
+            fatal!(format!("ERROR: Unknown argument \"{}\"", args[x]));
         }
     }
 
 
 
     if infile == ""{
-        println!("Error: no input file specified.");
-        std::process::exit(1);
+        fatal!("Error: no input file specified.");
     }
     let mut document = Document {vars: std_vars(), files: vec![default_docinfo(infile.clone(), &format)], format: format};
     document.files[0].outfilename = outfile;
@@ -221,26 +222,15 @@ fn main() {
 
 
 fn fmt_file(file: DocInfo, format: &String, document: &Document){
-    println!("exporting {} to {} with {}", &file.filename, &file.outfilename, &file.content);
+    alert!(format!("exporting {} to {} with {}", &file.filename, &file.outfilename, &file.content));
     let format_parser_output = format::format_parser(&file.content, document);
-    if format == "markdown"{                                                                                           
-        format::markdown_parser(&format_parser_output, &file.outfilename, file.clone());
-    }
-    else if format == "IR"{
-        fs::write(file.outfilename, format_parser_output + &("\n::::::::::\nTITLE:".to_owned() + &file.title)).expect("File system error.");
-    }
-    else if format == "HTML" || format == "html"{
-        format::html_parser(&format_parser_output, &file.outfilename, file.clone());
-    }
-    else if format == "text"{
-        format::text_parser(&format_parser_output, &file.outfilename, file.clone());
-    }
-    else if format == "logic"{
-        fs::write(file.outfilename, file.content).expect("File System error");
-    }
-    else{
-        println!("error: unknown format");
-        std::process::exit(1);
+    match format.as_str(){
+        "markdown" =>   {format::markdown_parser(&format_parser_output, &file.outfilename, file.clone())}
+        "IR" =>         {fs::write(file.outfilename, format_parser_output + &("\n::::::::::\nTITLE:".to_owned() + &file.title)).expect("File system error.")}
+        "HTML" | "html" =>       {format::html_parser(&format_parser_output, &file.outfilename, file.clone())}
+        "text" =>       {format::text_parser(&format_parser_output, &file.outfilename, file.clone())}
+        "logic" =>      {fs::write(file.outfilename, file.content).expect("File System error")}
+        _ =>            {fatal!("error: unknown format")}
     }
 
 }

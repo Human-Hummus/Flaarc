@@ -3,6 +3,7 @@ CCOMPILER = gcc -O3
 
 flaarc:target/release/flaarc funcs
 	cp target/release/flaarc /bin/flaarc
+	@echo "If you get an error following this, you might need to add /bin to your PATH. To do this, run \"export PATH=\$$PATH:/bin\""
 	flaarc -i readme.flaarc -o README.md -f markdown
 	flaarc -i readme.flaarc -o "src/help info.txt" -f text 
 

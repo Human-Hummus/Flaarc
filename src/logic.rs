@@ -3,11 +3,13 @@ use std::process::Command;
 use crate::DocInfo;
 use crate::Document;
 use crate::default_docinfo;
+extern crate termion;
+use crate::*;
 
 
 pub fn read_file(filename:&String) -> String{
     let data = fs::read_to_string(filename).unwrap_or_else(|_error|{
-        println!("Warning: unable to read file with name \"{}\"", filename);
+        warn!(format!("Warning: unable to read file with name \"{}\"", filename));
         return "\nFILE SYSTEM ERROR\n".to_string();
     });
     return data.to_string();
@@ -44,7 +46,7 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
             return (var[1].clone(), pos);
         }
     }
-    println!("Warning: variable \"{}\" (on line {}) is unknown.\nMake sure you terminated the variable with whitespace(which will NOT be written to the output),\nand that you didn't put whitespace within or immediately after the variable decleration.", var_name, lines_to_pos(&chars, pos));
+    warn!(format!("Warning: variable \"{}\" (on line {}) is unknown.\nMake sure you terminated the variable with whitespace(which will NOT be written to the output),\nand that you didn't put whitespace within or immediately after the variable decleration.", var_name, lines_to_pos(&chars, pos)));
     return (String::from("(ERROR; VAR NOT FOUND)"), pos);
 }
 
@@ -73,7 +75,7 @@ fn is_parsed_file(document: &Document, filename: &String) -> bool{
 //run a function.
 fn exec_fn(function: &String, text: &String) -> String{
     return String::from_utf8_lossy(&Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().unwrap_or_else(|_error|{
-        println!("Warning: function \"{}\" failed to execute", function);
+        warn!(format!("Warning: function \"{}\" failed to execute", function));
         return Command::new("echo").arg("ERROR: FN FAILED TO EXECUTE").output().unwrap();
     }).stdout).to_string();
 }
@@ -100,13 +102,12 @@ fn getdpos(document: &Document, filename: &String) -> usize{
 // Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does
 // formatting.
 pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo) -> (String, Document, DocInfo){
-    println!("NEWITER: {}", text);
+    debug!(format!("NEWITER: {}", text));
     let chars:Vec<char> = text.chars().collect();
     let mut output = String::new();
     let mut pos = 0;
 
     'mainloop: while pos < chars.len(){
-       // print!("{}", chars[pos]);
         if chars[pos] == '\\'{
             match chars[pos+1]{
                 '\\' => {output+="\\\\"}
@@ -160,7 +161,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                     //making this part a loop so that instead of exiting the program, we can break out
                     //of the loop.
                     if variable_name.len() < 1 || variable_content.len() < 1{
-                        println!("Warning! illegal variable definition on line {}", lines_to_pos(&chars, pos));
+                        warn!(format!("Warning! illegal variable definition on line {}", lines_to_pos(&chars, pos)));
                         output+="\nILLEGAL VARIABLE DEFINITION HERE\n";
                         continue;
                     }
@@ -198,7 +199,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 }
 
                 _ => {
-                    println!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &action);
+                    warn!(format!("Warning illegal hash on line {}, with hash's name set to: {}", lines_to_pos(&chars, pos), &action));
                     output+="(ILLEGAL HASH FUNCTION)\n";
                     }
 
@@ -222,12 +223,12 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 function+=&chars[pos].to_string();
                 pos+=1;
             }
-            println!("fn: {}", function);
+            debug!(format!("fn: {}", function));
             pos +=1;
             if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table"{
                 output+="{";
                 pos = prevpos+1;
-                println!("skfn: {}", function);
+                debug!(format!("skfn: {}", function));
             }
             else if function == "point"{
                 //this is a pain to do.
