@@ -17,6 +17,8 @@ pub fn read_file(filename:&String) -> String{
 
 //count the number of newline chars before the position "pos" 
 fn lines_to_pos(vc: &Vec<char>, pos: usize) -> i32{
+    alert!(pos.to_string());
+    error!(format!("{:?}", vc.to_owned()));
     let mut count = 0;
     let mut curpos = 0;
     while curpos < pos && curpos < vc.len(){
@@ -25,12 +27,14 @@ fn lines_to_pos(vc: &Vec<char>, pos: usize) -> i32{
         }
         curpos+=1;
     }
+    alert!(count.to_string());
     return count
 }
 
 //get the var, give text and position in the text, it'll return the content of the var, and the new
 //position. 
 fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, usize){
+    alert!(pos.to_string());
     pos+=1;
     let chars:Vec<char> = text.chars().collect();
     let mut var_name = String::new();
@@ -101,7 +105,7 @@ fn getdpos(document: &Document, filename: &String) -> usize{
 //
 // Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does
 // formatting.
-pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo) -> (String, Document, DocInfo){
+pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo, keep_dollar: bool) -> (String, Document, DocInfo){
     debug!(format!("NEWITER: {}", text));
     let chars:Vec<char> = text.chars().collect();
     let mut output = String::new();
@@ -109,17 +113,21 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
 
     'mainloop: while pos < chars.len(){
         if chars[pos] == '\\'{
-            match chars[pos+1]{
-                '\\' => {output+="\\\\"}
-                '#' =>  {output+="\\#"}
-                '{' =>  {output+="\\{"}
-                '}' =>  {output+="\\}"}
-                '$' =>  {output+="$"}
-                '_' =>  {output+="\\_"}
-                '/' =>  {output+="\\/"}
-                '-' => {output+="\\-"}
-                _ =>    {output+="\\\\";pos-=1;}
-            }
+            output+= match chars[pos+1]{
+                '\\' => "\\\\",
+                '#' =>  "\\#",
+                '{' =>  "\\{",
+                '}' =>  "\\}",
+                '$' =>  {match keep_dollar{
+                        true => "\\$",
+                        false => "$"
+                        }
+                    },
+                '_' =>  "\\_",
+                '/' =>  "\\/",
+                '-' =>  "\\-",
+                _ =>    {pos-=1;"\\\\"}
+            };
             pos+=2;
         }
         
@@ -152,7 +160,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 
                     for chr in x..variable_def_chars.len(){ variable_content.push(variable_def_chars[chr]) } // read the contents of the var.
 
-                    let tmp = logical_parser(&variable_content, document, docinf);
+                    let tmp = logical_parser(&variable_content, document, docinf, false);
                     variable_content = tmp.0;
                     document = tmp.1;
                     docinf = tmp.2;
@@ -177,7 +185,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
 
                 "include" | "import" | "use" => {
                     //HOLY SHIT!!!!!!1!!!!!!11!! IT'S FUCKING RECURSIVVVVE!!!!!!
-                    let tmp = logical_parser(&read_file(&data), document, docinf);
+                    let tmp = logical_parser(&read_file(&data), document, docinf, false);
                     output+=&tmp.0;
                     document = tmp.1;
                     docinf = tmp.2;
@@ -191,7 +199,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 "settextpadding" => { docinf.text_padding = data.parse::<i8>().unwrap() }
 
                 "section" | "image" | "quote" => { // SKIP THESE; leave them to the format parser
-                    let tmp = logical_parser(&data, document, docinf);
+                    let tmp = logical_parser(&data, document, docinf, false);
                     data = tmp.0;
                     document = tmp.1;
                     docinf = tmp.2;
@@ -256,7 +264,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                     //append the docinf to the document
                     document.files.push(default_docinfo(filename.clone(), &document.format));
                     //pass to logic parser
-                    let tmp = logical_parser(&read_file(&filename), document, newdocinf);
+                    let tmp = logical_parser(&read_file(&filename), document, newdocinf, false);
                     document = tmp.1;
                     newdocinf = tmp.2;
                     newdocinf.content = tmp.0;
@@ -284,6 +292,10 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                             input+="\\}";
                             pos+=2;
                         }
+                        else if chars[pos+1] == '$'{
+                            input+="\\$";
+                            pos+=2;
+                        }
                         else{
                             input.push(chars[pos]);
                             pos+=1;
@@ -304,12 +316,12 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                         pos+=1;
                     }
                 }
-                let parsed_input = logical_parser(&input, document, docinf);
+                let parsed_input = logical_parser(&input, document, docinf, true);
                 document = parsed_input.1;
                 docinf = parsed_input.2;
 
                 let executed = exec_fn(&function, &parsed_input.0);
-                let parsed_exec = logical_parser(&executed, document, docinf);
+                let parsed_exec = logical_parser(&executed, document, docinf, false);
                 output+=&parsed_exec.0;
                 document = parsed_exec.1;
                 docinf = parsed_exec.2;

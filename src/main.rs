@@ -207,7 +207,7 @@ fn main() {
 
     let file_content = logic::read_file(&infile);
     let df0 = document.files[0].clone();
-    let logical_parser_output = logic::logical_parser(&file_content, document, df0);
+    let logical_parser_output = logic::logical_parser(&file_content, document, df0, false);
     document = logical_parser_output.1;
     document.files[0] = logical_parser_output.2;
 
