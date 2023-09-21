@@ -3,6 +3,36 @@ use crate::DocInfo;
 use std::fmt::format;
 use crate::Document;
 use crate::*;
+use std::process::Command;
+use std::io::Write;
+
+const output_directory:&str = "/lib/flaarc/outputs/"; //directory to search for executables to use to make the output
+
+
+fn run_output(vars: &Vec<Vec<String>>, IR: &String, output:&String) -> String{
+    let mut arg1 = String::new();
+    for var in vars{
+        let mut toadd:String = String::from(var[0].clone()) + ":";
+        for charecter in var[1].chars().collect::<Vec<char>>(){
+            let ch_as_string:String = String::from(charecter);
+            toadd+=match charecter{
+                ';' => "\\;",
+                '\\' => "\\\\",
+                ':' => "\\:",
+                _ => ch_as_string.as_str()
+            }
+        }
+        toadd.push(';');
+        arg1+=&toadd;
+    }
+    return String::from_utf8_lossy(&Command::new(output_directory.to_owned() + output)
+                                   .arg(arg1)
+                                   .arg(IR)
+                                   .output()
+                                   .unwrap_or_else(|_error|{
+                                        fatal!(format!("fatal error: unable to execute {output}; the output."))
+                                   }).stdout).to_string();
+}
 
 macro_rules! flip_bool{
     ($bol:expr) => {
@@ -278,282 +308,11 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
     return output;
 }
 
-
-
-
-pub fn markdown_parser(text: &String, output_file: &String, info: DocInfo){
-    let mut output = format!("# {}", info.title);
-    let mut pos = 0;
-    let chars:Vec<char> = text.chars().collect();
-    let mut current_link = String::new();
-    let mut list_depth = 0;
-    let mut table_row_number = 0;
-    let mut row_items_number = 0;
-    
-    while pos < chars.len() {
-        if chars[pos] == '\\'{
-            if pos < chars.len()-1 && chars[pos+1] == '\\'{
-                output+="\\\\";
-                pos+=2
-            }
-            else{
-                let mut action = String::new();
-                pos+=1;
-                while pos < chars.len() && !"\\:".contains(chars[pos]){
-                    action.push(chars[pos]);
-                    pos+=1;
-                }
-                pos+=1;
-                match action.as_str(){
-                    "StartBold" => { output+="**" }
-                    "EndBold" => { output+="**" }
-                    "StartItalic" => { output+="*" }
-                    "EndItalic" => { output+="*" }
-                    "StartList" => { list_depth+=1 }
-                    "EndList" => { list_depth-=1 }
-                    "StartListItem" => {
-                        output+="\n";
-                        for _ in 1..list_depth{
-                            output+="\t";
-                        }
-                        output +="- ";
-                    }
-                    "EndListItem" => {} // do nothing
-                    "StartLink" => {
-                        current_link = String::new();
-                        while chars[pos] != '\\'{
-                            current_link.push(chars[pos]);pos+=1;
-                        }
-                        pos+=1;
-                        output+="[";
-                    }
-                    "EndLink" => { output+= &format!("]({})", current_link) }
-                    "Section" => { output+="## " }
-                    "EndSection" => { output+="\n" }
-                    "StartImage" => { output+="![image](" }
-                    "EndImage" => { output+=")" }
-                    "StartRight" => { output+="<div style=\"text-align: right\">" }
-                    "StartCenter" => { output+="<div style=\"text-align: center\">" }
-                    "EndRight" => { output+="</div>" }
-                    "EndCenter" => { output+="</div>" }
-                    "StartTable" => {table_row_number=0;} //do nothing
-                    "EndTable" => {} //do nothing
-                    "StartTableRow" => {
-                        if table_row_number == 1{
-                            output+="\n|";
-                            while 0 < row_items_number{
-                                row_items_number-=1;
-                                output+="---|";
-                            }
-                        }
-                        output+="\n|";
-                        table_row_number+=1;
-                        row_items_number=0;
-                    }
-                    "EndTableRow" => {} //do nothing
-                    "StartTableItem" => {} //do nothing
-                    "EndTableItem" => {
-                        output+="|";
-                        row_items_number+=1;
-                    }
-                    "Startmark" => { output+="<mark>" }
-                    "EndMark" => { output+="</mark>" }
-                    "StartSuperscript" => { output+="<sup>" }
-                    "EndSuperscript" => { output+="</sup>" }
-                    "StartSuperscript" => { output+="<sub>" }
-                    "EndSubscript" => { output+="</sub>" }
-                    "StartQuote" => { output+="\n>" }
-                    "EndQuote" => { output+="\n" }
-                    "StartStrike" => { output+="~~" }
-                    "EndStrike" => { output+="~~" }
-                    _ => {}
-                }
-
-            }
-        }
-        else if "_*#<>".contains(chars[pos]){match chars[pos]{
-            '_' => { output+="\\_" }
-            '*' => { output+="\\*" }
-            '#' => { output+="\\#" }
-            '<' => { output+="\\<" }
-            '>' => { output+="\\>" }
-            _ => {}
-        }pos+=1}
-        else{
-            output.push(chars[pos]);
-            pos+=1;
-        }
-
-    }
-
-    fs::write(output_file, output).expect("error writing file");
-}
-
-
-pub fn html_parser(text: &String, output_file: &String, info: DocInfo){
-    let mut output:String = format!("<DOCTYPE! html><html><head><style>body {{box-sizing: border-box; margin:auto; padding: {}%; background-color: {}}}\n:root{{background:{}; padding: {}%}}</style><title>{}</title></head><body><div><h1>{}</h1></div>", info.text_padding, info.page_color, info.bg_color, info.page_padding, info.title, info.title);
-    let chars:Vec<char> = text.chars().collect();
-    let mut pos = 0;
-
-    while pos < chars.len(){
-        if chars[pos] == '\\'{
-            if pos < chars.len()-1 && chars[pos+1] == '\\'{
-                output+="\\";
-                pos+=2;
-            }
-            else{
-                pos+=1;
-                let mut action = String::new();
-                while !"\\:\n".contains(chars[pos]){
-                    action.push(chars[pos]);
-                    pos+=1;
-                }
-                pos+=1;
-                match action.as_str(){
-                    "StartBold" => { output+="<strong>" }
-                    "EndBold" => { output+="</strong>" }
-                    "StartItalic" => { output+="<em>" }
-                    "EndItalic" => { output+="</em>" }
-                    "StartList" => { output+="<ul>" }
-                    "EndList" => { output+="</ul>" }
-                    "StartListItem" => { output+="<li>" }
-                    "EndListItem" => { output+="</li>" }
-                    //{ output+= &format!("<p style=\"font-family:\'{}\'\">", info.font) }
-                    "EndParagraph" => { output+="</p>" }
-                    "StartLink" => {
-                        let mut link_to = String::new();
-                        while pos < chars.len() && chars[pos] != '\\'{
-                            link_to.push(chars[pos]);
-                            pos+=1;
-                        }
-                        pos+=1;
-                        output+=&format!("<a href=\"{}\">", link_to);
-                    }
-                    "EndLink" => { output+="</a>" }
-                    "Section" => { output+="<h2>" }
-                    "Startmark" => { output+="<mark>" }
-                    "EndSection" => { output+="</h2>" }
-                    "StartImage" => { output+="<img src=\"" }
-                    "EndImage" => { output+="\">" }
-                    "StartRight" => { output+="<div style=\"text-align: right\">" }
-                    "StartCenter" => { output+="<div style=\"text-align: center\">"}
-                    "EndRight" => { output+="</div>" }
-                    "EndCenter" => { output+="</div>" }
-                    "EndMark" => { output+="</mark>" }
-                    "StartTable" => { output+="<table>" }
-                    "EndTable" => { output+="</table>" }
-                    "StartTableItem" => { output+="<th>" }
-                    "EndTableItem" => { output+="</th>" }
-                    "StartTableRow" => { output+="<tr>" }
-                    "EndTableRow" => { output+="</tr>" }
-                    "StartSuperscript" => { output+="<sup>" }
-                    "EndSuperscript" => { output+="</sup>" }
-                    "StartSuperscript" => { output+="<sub>" }
-                    "EndSubscript" => { output+="</sub>" }
-                    "StartQuote" => { output+="<blockquote>" }
-                    "EndQuote" => { output+="</blockquote>" }
-                    "StartStrike" => { output+="<del>" }
-                    "EndStrike" => { output+="</del>" }
-                    _ => {}
-                }
-            }
-            
-        }
-        else if "\n<>\"\'&".contains(chars[pos]){match chars[pos]{
-            '\n' => { output+="<br>" }
-            '<' => { output+="&lt;" }
-            '>' => { output+="&gt;" }
-            '"' => { output+="&quot;" }
-            '\'' => { output+="&apos;" }   
-            '&' => { output+="&amp;" }
-            _ => {}
-        }pos+=1}
-        else{
-            output.push(chars[pos]);
-            pos+=1;
-        }
-    }
-    output+="</p></body></html>";
-
-    fs::write(output_file, output).expect("error writing file");
-}
-
-pub fn text_parser(text: &String, output_file: &String, info: DocInfo){
-    let mut output = "".to_string();
-    output+=&info.title;
-    output+="___________________________________________";
-    let chars:Vec<char> = text.chars().collect();
-    let mut pos = 0;
-    let mut indents = 0;
-
-    while pos < chars.len(){
-        if chars[pos] == '\\'{
-            if pos < chars.len()-1 && chars[pos+1] == '\\'{
-                output+="\\";
-                pos+=2;
-            }
-            else{
-                pos+=1;
-                let mut action = String::new();
-                while pos < chars.len() && chars[pos] != '\\'{
-                    action.push(chars[pos]);
-                    pos+=1;
-                }
-                pos+=1;
-                match action.as_str(){
-                    "StartBold" => { output+="__" }
-                    "EndBold" => { output+="__" }
-                    "StartItalic" => { output+="//" }
-                    "EndItalic" => { output+="//" }
-                    "StartList" => { indents+=1 }
-                    "EndList" => { indents-=1 }
-                    "StartListItem" => {
-                        let mut indents_done = 0;
-                        while indents_done < indents{
-                            output+="\t";
-                            indents_done+=1;
-                        }
-                        output+="> ";
-                    }
-                    "EndListItem" => { output+="\n" }
-                    "StartParagraph" => { output+="\n\t" }
-                    "EndParagraph" => { output+="\n" }
-                    "StartLink" => {
-                        let mut link = String::new();
-                        while chars[pos] != '\\'{
-                            link.push(chars[pos]);
-                            pos+=1;
-                        }
-                        pos+=1;
-                        output+=&format!("(LINK: \"{}\" Text: ", link);
-                    }
-                    "EndLink" => { output+=")" }
-                    "Section" => { output+="=========================\n" }
-                    "EndSection" => { output+="\n=========================\n" }
-                    "StartRight" => {output+="<div style=\"text-align: right\">"}
-                    "EndRight" => {output+="</div>"}
-                    "StartCenter" => {output+="<div style=\"text-align: center\">"}
-                    "EndCenter" => {output+="</div>"}
-                    "Startmark" => {output+="<mark>"}
-                    "EndMark" => {output+="</mark>"}
-                    "StartTable" => {output+="\n"}
-                    "EndTable" => {output+="\n"}
-                    "StartTableRow" => {output+=""}
-                    "EndTableRow" => {output+="\n"}
-                    "StartTableItem" => {output+="\t"}
-                    "EndTableItem" => {output+="|"}
-                    _ => {}
-                }
-
-            }
-            
-        }
-        else{
-            output.push(chars[pos]);
-            pos+=1;
-        }
-    }
-    output+="";
-
-    fs::write(output_file, output).expect("error writing file");
+pub fn output_file(output_type:&String, output_file:&String, IR:&String, vars:&Vec<Vec<String>>){
+    std::fs::File::create(output_file)
+        .unwrap_or_else(|_|{fatal!(format!("fatal error: unable to open/create file \"{output_file}\""))})
+        .write_all(
+                run_output(vars, IR, output_type).as_bytes()
+            )
+        .unwrap_or_else(|_|{fatal!(format!("fatal error: unable to open/create file \"{output_file}\""))});
 }

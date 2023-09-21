@@ -17,7 +17,6 @@ pub fn read_file(filename:&String) -> String{
 
 //count the number of newline chars before the position "pos" 
 fn lines_to_pos(vc: &Vec<char>, pos: usize) -> i32{
-    alert!(pos.to_string());
     error!(format!("{:?}", vc.to_owned()));
     let mut count = 0;
     let mut curpos = 0;
@@ -27,14 +26,12 @@ fn lines_to_pos(vc: &Vec<char>, pos: usize) -> i32{
         }
         curpos+=1;
     }
-    alert!(count.to_string());
     return count
 }
 
 //get the var, give text and position in the text, it'll return the content of the var, and the new
 //position. 
 fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, usize){
-    alert!(pos.to_string());
     pos+=1;
     let chars:Vec<char> = text.chars().collect();
     let mut var_name = String::new();
@@ -46,7 +43,6 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
             
     for var in vars{ 
         if var_name == var[0]{
-            println!("{}; {}", var[0], var[1]);
             return (var[1].clone(), pos);
         }
     }
@@ -271,7 +267,6 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                     document = setnewdocinf(&filename, newdocinf, document);
                 }
                 output+=&format!("{{filelink:{}|{}}}", filename, linkname); //the format parser will find the output filename
-                println!("{}, {}", &docinf.filename, &format!("{}link:{}|{}{}", '{', document.files[getdpos(&document, &filename)].outfilename, linkname, '}'));
                 pos+=1; 
                 
             }

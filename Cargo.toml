@@ -1,3 +1,4 @@
+cargo-features = ["profile-rustflags"]
 [package]
 name = "flaarc"
 version = "0.1.1"
@@ -8,3 +9,8 @@ edition = "2021"
 [dependencies]
 chrono = "*"
 termion = "*"
+
+[profile.release]
+lto = true
+rustflags = ["-C", "target-cpu=native"]
+codegen-units = 1

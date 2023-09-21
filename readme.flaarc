@@ -66,8 +66,6 @@ Hashes are lines that begin with the '\#' symbol. There are a few types of hashe
 
 \#title \{title\}: set the title, this will be the title of the webpage and will be printed at the top, defaults to: "title". Creative, I know.
 
-\#setfont \{font\} set the font.
-
 \#image \{path_to_image\}, include image in document.
 
 \#quote \{text to quote\} quote the text
@@ -184,27 +182,6 @@ item 1a|item 1b
 item 2a|item 2b
 }
 
-#section Style($cool )
-styles are defined by hashes.
-
-to set the font, use "setfont". For example, to set the page's font to times,
-\#setfont times
-
-to set the background color, use "setbgcolor". For example, to set the background's color to blue,
-\#setbgcolor blue
-
-to set the page's color, use "setpagecolor". For example, to set the page's color to green,
-\#setpagecolor green
-
-to set the page's padding(the gap from the page to the border), use "setpagepadding". For example, to set the page's padding to 3%:
-\#setpagepadding 3
-
-to set the text's padding(the gap from the page's border to the text/content), use "set text padding". For example, to set the text's padding to 5%,
-\#settextpadding 5.
-
-all of these together would produce the following page.
-#image exampleimage.png
-
 #section pointing to other files.
 if you want Flaarc to make multiple output files, use the "point" function.
 say you've got 2 files:
@@ -223,6 +200,15 @@ file 2.flaarc.html
 
 There will be a link in "file 1.flaarc.html" to "file 2.flaarc.html". the syntax of these links work the same as standard links.
 
+#section Outputs
+{p:
+You can set the output script to use with the -f flag. The first argument provided to the
+output script will be a list of defined variables and their contents. The list will be in the
+following format: "VAR_NAME:VAR_CONTENTS;VAR2_NAME:VAR2_CONTENTS;" etc. Semicolons, Colons,
+and backslashes will be preceeded with a backslash. The second argument provided to the output
+script will be the contents of the document in the form of IR. Print the returned values to
+the standard output.
+}
 
 #section Features I want to add/TO DO:
 {list:
