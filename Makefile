@@ -14,9 +14,13 @@ qfuncs:
 	tcc "standard_functions/p.c" -o "/lib/flaarc/p"
 	tcc "standard_functions/length.c" -o "/lib/flaarc/length"
 	mkdir -p /lib/flaarc/outputs
-	tcc "outputs/markdown.c" -o "/lib/flaarc/outputs/markdown" -o "/lib/flaarc/outputs/md"
-	tcc "outputs/html.c" -o "/lib/flaarc/outputs/html" -o "/lib/flaarc/outputs/HTML"
-	tcc "outputs/plaintext.c" -o "/lib/flaarc/outputs/plaintext" -o "/lib/flaarc/outputs/HTML"
+	tcc "outputs/markdown.c" -o "/lib/flaarc/outputs/markdown" 
+	tcc "outputs/markdown.c" -o "/lib/flaarc/outputs/md"
+	tcc "outputs/html.c" -o "/lib/flaarc/outputs/html" 
+	tcc "outputs/html.c" -o "/lib/flaarc/outputs/HTML"
+	tcc "outputs/plaintext.c" -o "/lib/flaarc/outputs/plaintext"
+	tcc "outputs/plaintext.c" -o "/lib/flaarc/outputs/text"
+	tcc "outputs/plaintext.c" -o "/lib/flaarc/outputs/txt"
 
 
 
@@ -35,9 +39,13 @@ funcs:
 	$(CC) $(CFLAGS) "standard_functions/p.c" -o "/lib/flaarc/p"
 	$(CC) $(CFLAGS) "standard_functions/length.c" -o "/lib/flaarc/length"
 	mkdir -p /lib/flaarc/outputs
-	$(CC) $(CFLAGS) "outputs/markdown.c" -o "/lib/flaarc/outputs/markdown" -o "/lib/flaarc/outputs/md"
-	$(CC) $(CFLAGS) "outputs/html.c" -o "/lib/flaarc/outputs/html" -o "/lib/flaarc/outputs/HTML"
-	$(CC) $(CFLAGS) "outputs/plaintext.c" -o "/lib/flaarc/outputs/plaintext" -o "/lib/flaarc/outputs/HTML"
+	$(CC) $(CFLAGS) "outputs/markdown.c" -o "/lib/flaarc/outputs/markdown" 
+	$(CC) $(CFLAGS) "outputs/markdown.c" -o "/lib/flaarc/outputs/md"
+	$(CC) $(CFLAGS) "outputs/html.c" -o "/lib/flaarc/outputs/html"
+	$(CC) $(CFLAGS) "outputs/html.c" -o "/lib/flaarc/outputs/HTML"
+	$(CC) $(CFLAGS) "outputs/plaintext.c" -o "/lib/flaarc/outputs/plaintext"
+	$(CC) $(CFLAGS) "outputs/plaintext.c" -o "/lib/flaarc/outputs/text"
+	$(CC) $(CFLAGS) "outputs/plaintext.c" -o "/lib/flaarc/outputs/txt"
 
 
 clean:

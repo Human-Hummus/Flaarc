@@ -52,7 +52,13 @@ int main(int argc, char **argv){
 	int number_of_header_rows = 0;
 
 	while (text[pointer] != 0){
-		if (text[pointer] == '\\'){
+                if (text[pointer] == '\n'){printf("<br>");}
+                else if (text[pointer] == '\''){printf("&apos;");}
+                else if (text[pointer] == '"'){printf("&quot;");}
+                else if (text[pointer] == '<'){printf("&lt;");}
+                else if (text[pointer] == '>'){printf("&gt;");}
+                else if (text[pointer] == '&'){printf("&amp;");}
+		else if (text[pointer] == '\\'){
 			pointer++;
 			if (text[pointer] != '\\'){
 				while (text[pointer] != '\\'){
@@ -85,10 +91,9 @@ int main(int argc, char **argv){
 					printf("</li>");
 				}
 				else if (strcmp("StartLink", operation) == 0){
-					while (text[pointer] != '\\'){
+					while (text[pointer] != '|'){
 						current_link[current_link_pos++] = text[pointer++];
 					}
-					pointer++;
 					current_link[current_link_pos] = 0;
 					current_link_pos = 0;
 					printf("<a href=\"%s\">", current_link);
@@ -102,6 +107,12 @@ int main(int argc, char **argv){
 				else if (strcmp("EndSection", operation) == 0){
 					printf("</h2>");
 				}
+                                else if (strcmp("SubSection",operation) == 0){
+                                        printf("<h3>");
+                                }
+                                else if (strcmp("EndSubSection", operation) == 0){
+                                        printf("</h3>");
+                                }
 				else if (strcmp("StartImage", operation) == 0){
 					printf("<img src=\"");
 				}
@@ -145,15 +156,10 @@ int main(int argc, char **argv){
 				else if (strcmp("EndQuote", operation) == 0){printf("</blockquote>");}
 				else if (strcmp("StartStrike", operation) == 0){printf("<del>");}
 				else if (strcmp("EndStrike", operation) == 0){printf("</del>");}
+				else if (strcmp("Break", operation) == 0){printf("<div style=\"page-break-before:always\"</div>");}
 			}
 			else{printf("\\\\");}
 		}
-		else if (text[pointer] == '\n'){printf("<br>");}
-		else if (text[pointer] == '\''){printf("&apos;");}
-		else if (text[pointer] == '"'){printf("&quot;");}
-		else if (text[pointer] == '<'){printf("&lt;");}
-		else if (text[pointer] == '>'){printf("&gt;");}
-		else if (text[pointer] == '&'){printf("&amp;");}
 		else{printf("%c", text[pointer]);}
 		pointer++;
 

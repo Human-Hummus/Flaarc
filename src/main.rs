@@ -160,6 +160,7 @@ pub fn std_vars() -> Vec<Vec<String>>{
     out.push(["brain".to_string(), "🧠".to_string()].to_vec());
     out.push(["cap".to_string(), "🧢".to_string()].to_vec());
     out.push(["frog".to_string(), include_str!("sexy frog.txt").to_string()].to_vec());
+    out.push(["div".to_string(), "÷".to_string()].to_vec());
     return out;
 }
 
@@ -204,6 +205,7 @@ fn main() {
     let mut x = 0;
 
     while x < document.files.len(){
+        debug!(format!("stuff: {}", document.files[x].content));
         let mut vars = document.vars.clone();
         vars.push(vec!["title".to_string(), document.files[x].title.clone()]);
         fmt_file(document.files[x].clone(), &document.format, &document, &vars);

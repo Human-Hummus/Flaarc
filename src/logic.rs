@@ -173,7 +173,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                     //find if (and where) the var is in the vars list.
                     for var_number in 0..document.vars.len(){
                         if document.vars[var_number][0] == variable_name{
-                            document.vars[var_number][1] = variable_content; continue 'mainloop;
+                            document.vars[var_number][1] = variable_content; pos+=1;continue 'mainloop;
                         }
                     }
                     document.vars.push(vec![variable_name, variable_content]); //this runs if the var WASN'T found.
@@ -188,13 +188,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 }
 
                 "title" => { docinf.title = data }
-                "setfont" => { docinf.font = data }
-                "setbgcolor" => { docinf.bg_color = data }
-                "setpagecolor" => { docinf.page_color = data }
-                "setpagepadding" => { docinf.page_padding = data.parse::<i8>().unwrap() }
-                "settextpadding" => { docinf.text_padding = data.parse::<i8>().unwrap() }
-
-                "section" | "image" | "quote" => { // SKIP THESE; leave them to the format parser
+                "section" | "image" | "quote" | "subsection" | "filelink" => { // SKIP THESE; leave them to the format parser
                     let tmp = logical_parser(&data, document, docinf, false);
                     data = tmp.0;
                     document = tmp.1;
@@ -229,7 +223,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
             }
             debug!(format!("fn: {}", function));
             pos +=1;
-            if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table"{
+            if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table" || function == "filelink"{
                 output+="{";
                 pos = prevpos+1;
                 debug!(format!("skfn: {}", function));

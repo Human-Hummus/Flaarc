@@ -59,7 +59,7 @@ pub fn get_outfname(document: &Document, filename: &String) -> usize{
 
 //parses the... format; generate IR in order to make it easier to parse later to generate HTML, md, etc.
 pub fn format_parser(input: &String, doc:&Document) -> String{
-    debug!(format!("input: {}", input));
+    debug!(format!("format parser input: {}", input));
     let mut output = String::new();
     let chars:Vec<char> = input.chars().collect();
     let mut pos = 0;
@@ -73,6 +73,16 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
     let mut is_crossout = false;
 
     while pos < chars.len(){
+        if depthinfo.contains(&'t') && chars[pos] != ' ' && chars[pos] != '\t'{
+            if !is_table_row{
+                flip_bool!(is_table_row);
+                output+="\\StartTableRow\\";
+            }
+            if !is_table_item{
+                flip_bool!(is_table_item);
+                output+="\\StartTableItem\\"
+            }
+        }
         if chars[pos] == '_'  && pos < chars.len()-1 && chars[pos+1] == '_'{
             match is_bold{
                 true => { output+="\\EndBold\\"; }
@@ -149,7 +159,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
                         pos+=1;
                     }
                     pos+=1;
-                    output+=&format!("\\StartLink:{}\\{}\\EndLink\\", doc.files[get_outfname(doc, &filename)].outfilename, linkname);
+                    output+=&format!("\\StartLink\\{}|{}\\EndLink\\", doc.files[get_outfname(doc, &filename)].outfilename, linkname);
 
                 }
 
@@ -159,7 +169,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
                         link_address.push(chars[pos]);
                         pos+=1;
                     }
-                    output+= &format!("\\StartLink:{}\\", link_address.clone());
+                    output+= &format!("\\StartLink\\{}|", link_address.clone());
         
                     if chars[pos] != '}'{ depthinfo.push('u') } //U is for Url.
                     else{ output+= &format!("{}\\EndLink\\", link_address); }
@@ -231,7 +241,6 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
                     }
                     temp_pos+=1;
                 }
-                pos+=1;
             }
             else if depthinfo.contains(&'t'){
                 if is_table_item{
@@ -242,13 +251,11 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
                     flip_bool!(is_table_row);
                     output+="\\EndTableRow\\";
                 }
-                pos+=1;
             }
-
             else{
                 output+="\n";
-                pos+=1;
             }
+            pos+=1;
         }
 
         else if chars[pos] == '#'{
@@ -259,6 +266,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
             while pos < chars.len() && !" \n".contains(chars[pos]){
                 action.push(chars[pos]); pos+=1;
             }
+            if action == "break"{output+="\\Break\\"; continue;}
             while pos < chars.len() && chars[pos] != '\n'{ 
                 argument.push(chars[pos]); pos+=1;
             }
@@ -270,6 +278,9 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
             }
             else if action == "quote"{
                 output+= &format!("\\StartQuote\\{}\\EndQuote\\", argument);
+            }
+            else if action == "subsection"{
+                output+= &format!("\\SubSection\\{}\\EndSubSection\\", argument);
             }
             pos+=1;
         }
@@ -283,17 +294,6 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
         }
 
         else{
-            if depthinfo.contains(&'t') && chars[pos] != ' ' && chars[pos] != '\t'{
-                if !is_table_row{
-                    flip_bool!(is_table_row);
-                    output+="\\StartTableRow\\";
-                }
-                if !is_table_item{
-                    flip_bool!(is_table_item);
-                    output+="\\StartTableItem\\"
-                }
-                
-            }
             output.push(chars[pos]);
             pos+=1;
         }
@@ -305,6 +305,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
     if is_italic{
         output+="\\EndItalic\\";
     }
+    debug!(format!("parser output: {output}"));
     return output;
 }
 

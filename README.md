@@ -1,7 +1,7 @@
 # Flaarc - (F)untional (La)tex-like M(ar)kdown Clone, With Some (C)-like Syntax. Also Lisp, Too.
 
 ##  What is it; Why should I use it?
- I made this project because I was unhappy with Latex, as it's tough to write short documents in it, but I also didn't want to use Markdown, because it'd lack many features present in Latex. Flaarc is supposed to have a syntax that resembles normal text as little as possible, that way when you don't need the features, you don't have them, but when you do, they're fairly easy to use. Does this mean you should use it? Probably not, at least not yet. As it is *very* much **alpha quality**, I wouldn't recommend it for anything remotely serious. As a fun thing to try? Sure. If you **do** want something more "serious",  I'd engourage you to check out hugo](),  as it's not just a fun project made by some kid online. 
+ I made this project because I was unhappy with Latex, as it's tough to write short documents in it, but I also didn't want to use Markdown, because it'd lack many features present in Latex. Flaarc is supposed to have a syntax that resembles normal text as little as possible, that way when you don't need the features, you don't have them, but when you do, they're fairly easy to use. Does this mean you should use it? Probably not, at least not yet. As it is *very* much **alpha quality**, I wouldn't recommend it for anything remotely serious. As a fun thing to try? Sure. If you **do** want something more "serious",  I'd engourage you to check out [hugo](\https://github.com/gohugoio/hugo),  as it's not just a fun project made by some kid online. 
 
 ##  Using It From The CLI
 The basic syntax is as follows:
@@ -23,6 +23,7 @@ list of output formats supported.
 |Intermediate Representation|IR|Text from the format parser|
 |Text|text|Plain text|
 |Logic|logic|Text from the logical parser|
+||
 
 
 
@@ -85,7 +86,6 @@ To declare a variable, you need a "\#" preceded by a newline, immediately procee
 For example, if you want to declare the variable "x" and set it to contain "this is in x!" you'd type:
 
 \#define x this is in x!
-
 
 To use a variable within text, type the variable's name preceded by a '$', and proceded by a space. Note that the space will be ignored, if you want a space after a variable, type two spaces.
 To access the contents of x, we could say:
@@ -154,6 +154,8 @@ The following is a full list of the default variables and their values.
 |accute|x ́|
 |overline|x ̅|
 |diaresis|x ̈|
+|div | ÷|
+||
 
 
 ##  Tables
@@ -170,6 +172,7 @@ This would produce the following table:
 |item 1a|item 1b|
 |---|---|
 |item 2a|item 2b|
+||
 
 ##  pointing to other files.
 if you want Flaarc to make multiple output files, use the "point" function.

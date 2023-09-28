@@ -76,10 +76,9 @@ int main(int argc, char **argv){
 				}
 				else if (strcmp("EndListItem", operation) == 0){} //do nothing
 				else if (strcmp("StartLink", operation) == 0){
-					while (text[pointer] != '\\'){
+					while (text[pointer] != '|'){
 						current_link[current_link_pos++] = text[pointer++];
 					}
-					pointer++;
 					current_link[current_link_pos] = 0;
 					current_link_pos = 0;
 					printf("[");
