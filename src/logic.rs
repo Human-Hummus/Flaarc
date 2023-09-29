@@ -73,9 +73,9 @@ fn is_parsed_file(document: &Document, filename: &String) -> bool{
 
 
 //run a function.
-fn exec_fn(function: &String, text: &String) -> String{
+fn exec_fn(function: &String, text: &String, maintext:&Vec<char>, pos:usize) -> String{
     return String::from_utf8_lossy(&Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().unwrap_or_else(|_error|{
-        warn!(format!("Warning: function \"{}\" failed to execute", function));
+        warn!(format!("Warning: function \"{}\" on line {} failed to execute", function, lines_to_pos(maintext, pos)));
         return Command::new("echo").arg("ERROR: FN FAILED TO EXECUTE").output().unwrap();
     }).stdout).to_string();
 }
@@ -136,7 +136,12 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 while pos < chars.len() && chars[pos] != '\n'{ pos+=1 }
                 continue;
             }
-            while !" \t".contains(chars[pos]) { action.push(chars[pos]); pos+=1 }   // find the action
+            while !" \t\n".contains(chars[pos]) { action.push(chars[pos]); pos+=1 }   // find the action
+            if action == "break"{
+                output+="#break\n";
+                while pos < chars.len() && chars[pos] != '\n'{ pos+=1 }
+                continue;
+            }
             while " \t".contains(chars[pos]) { pos+=1 }                             //skip whitespace.
             while chars[pos] != '\n'{ data.push(chars[pos]); pos+=1 }               // get the data
             
@@ -309,7 +314,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 document = parsed_input.1;
                 docinf = parsed_input.2;
 
-                let executed = exec_fn(&function, &parsed_input.0);
+                let executed = exec_fn(&function, &parsed_input.0, &chars, pos);
                 let parsed_exec = logical_parser(&executed, document, docinf, false);
                 output+=&parsed_exec.0;
                 document = parsed_exec.1;

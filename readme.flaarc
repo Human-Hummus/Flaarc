@@ -31,7 +31,6 @@ Markdown|markdown|markdown
 HTML|html|HTML
 Intermediate Representation|IR|Text from the format parser
 Text|text|Plain text
-Logic|logic|Text from the logical parser
 }
 
 
@@ -69,6 +68,8 @@ Hashes are lines that begin with the '\#' symbol. There are a few types of hashe
 \#image \{path_to_image\}, include image in document.
 
 \#quote \{text to quote\} quote the text
+
+\#break Page break. (currently only effective when printing PDF from HTML)
 
 to type a \# on its own, ensure it's preceded by a backslash, like this: \\\#.
 

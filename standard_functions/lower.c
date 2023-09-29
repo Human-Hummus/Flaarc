@@ -1,6 +1,4 @@
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
+#include "forall.c"
 
 
 int main(int argc, char* argv[]){

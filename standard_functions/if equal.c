@@ -1,11 +1,8 @@
-#define data 1000
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
+#include "forall.c"
 
 int main(int argc, char* argv[]){
-	char arg1[data];
-	char arg2[data];
+	char arg1[SMALL_BUFFERLEN];
+	char arg2[SMALL_BUFFERLEN];
 
 	int tmp = 0;
 	int curpoint = 0;

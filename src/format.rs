@@ -6,7 +6,7 @@ use crate::*;
 use std::process::Command;
 use std::io::Write;
 
-const output_directory:&str = "/lib/flaarc/outputs/"; //directory to search for executables to use to make the output
+const OUTPUT_DIRECTORY:&str = "/lib/flaarc/outputs/"; //directory to search for executables to use to make the output
 
 
 fn run_output(vars: &Vec<Vec<String>>, IR: &String, output:&String) -> String{
@@ -25,7 +25,7 @@ fn run_output(vars: &Vec<Vec<String>>, IR: &String, output:&String) -> String{
         toadd.push(';');
         arg1+=&toadd;
     }
-    return String::from_utf8_lossy(&Command::new(output_directory.to_owned() + output)
+    return String::from_utf8_lossy(&Command::new(OUTPUT_DIRECTORY.to_owned() + output)
                                    .arg(arg1)
                                    .arg(IR)
                                    .output()
