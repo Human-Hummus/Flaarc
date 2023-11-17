@@ -1,14 +1,11 @@
-mod logic;
-use chrono;
-use chrono::Datelike;
-use std::env;
-mod format;
-use std::fs;
 extern crate termion;
+
+mod logic;
+mod format;
+mod standard_variables;
 #[macro_use]
 pub mod output;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub struct Document{
     files: Vec<DocInfo>,
@@ -103,72 +100,12 @@ fn default_docinfo(filename: String, format: &String) -> DocInfo{
 }
 
 
-// define the standard vars.
-pub fn std_vars() -> Vec<Vec<String>>{
-    let mut out:Vec<Vec<String>> = vec![];
-    out.push(["version".to_string(), VERSION.to_string()].to_vec());
-    out.push(["year".to_string(), chrono::Utc::now().year().to_string()].to_vec());
-    out.push(["month".to_string(), chrono::Utc::now().month().to_string()].to_vec());
-    out.push(["day".to_string(), chrono::Utc::now().day().to_string()].to_vec());
-    out.push(["invbang".to_string(), "¡".to_string()].to_vec());
-    out.push(["copy".to_string(), "©".to_string()].to_vec());
-    out.push(["reg".to_string(), "®".to_string()].to_vec());
-    out.push(["deg".to_string(), "°".to_string()].to_vec());
-    out.push(["plusmn".to_string(), "±".to_string()].to_vec());
-    out.push(["micro".to_string(), "µ".to_string()].to_vec());
-    
-    //these are unicode combining chars, you can't see them, but they're there!
-    out.push(["accute".to_string(), " ́".to_string()].to_vec());
-    out.push(["overline".to_string(), " ̅".to_string()].to_vec());
-    out.push(["diaresis".to_string(), " ̈".to_string()].to_vec());
-    //done with the unicode now*!
-    
-    out.push(["theta".to_string(), "ϴ".to_string()].to_vec());
-    out.push(["omega".to_string(), "Ω".to_string()].to_vec());
-    out.push(["alpha".to_string(), "α".to_string()].to_vec());
-    out.push(["beta".to_string(), "β".to_string()].to_vec());
-    out.push(["gamma".to_string(), "γ".to_string()].to_vec());
-    out.push(["delta".to_string(), "Δ".to_string()].to_vec());
-    out.push(["sigma".to_string(), "Σ".to_string()].to_vec());
-    out.push(["pi".to_string(), "π".to_string()].to_vec());
-    out.push(["cap_omega".to_string(), "Ѡ".to_string()].to_vec());
-    out.push(["bullet".to_string(), "•".to_string()].to_vec());
-    out.push(["block".to_string(), "█".to_string()].to_vec());
-    out.push(["light_shade".to_string(), "░".to_string()].to_vec());
-    out.push(["med_shade".to_string(), "▒".to_string()].to_vec());
-    out.push(["dark_shade".to_string(), "▓".to_string()].to_vec());
-
-    //emojis!!!!
-    out.push(["thunder".to_string(), "⚡".to_string()].to_vec());
-    out.push(["fist".to_string(), "✊".to_string()].to_vec());
-    out.push(["check".to_string(), "✔".to_string()].to_vec());
-    out.push(["x".to_string(), "✘".to_string()].to_vec());
-    out.push(["sparkle".to_string(), "✨".to_string()].to_vec());
-    out.push(["cross".to_string(), "❌".to_string()].to_vec());
-    out.push(["black_heart".to_string(), "❤".to_string()].to_vec());
-    out.push(["smile".to_string(), "😀".to_string()].to_vec());
-    out.push(["veryfunny".to_string(), "😂".to_string()].to_vec());
-    out.push(["smile2".to_string(), "😃".to_string()].to_vec());
-    out.push(["embarrassment".to_string(), "😅".to_string()].to_vec());
-    out.push(["cool".to_string(), "😎".to_string()].to_vec());
-    out.push(["smirk".to_string(), "😏".to_string()].to_vec());
-    out.push(["apathy".to_string(), "😐".to_string()].to_vec());
-    out.push(["crying".to_string(), "😢".to_string()].to_vec());
-    out.push(["ono".to_string(), "😳".to_string()].to_vec());
-    out.push(["Smile".to_string(), "🙂".to_string()].to_vec());
-    out.push(["nerd".to_string(), "🤓".to_string()].to_vec());
-    out.push(["brain".to_string(), "🧠".to_string()].to_vec());
-    out.push(["cap".to_string(), "🧢".to_string()].to_vec());
-    out.push(["frog".to_string(), include_str!("sexy frog.txt").to_string()].to_vec());
-    out.push(["div".to_string(), "÷".to_string()].to_vec());
-    return out;
-}
 
 fn main() {
     let mut infile = "".to_string(); 
     let mut outfile = "output.html".to_string();
     let mut format = "html".to_string();
-    let args: Vec<_> = env::args().collect();
+    let args: Vec<_> = std::env::args().collect();
 
     let mut x = 1;
     while x < args.len(){match args[x].as_str(){
@@ -193,7 +130,7 @@ fn main() {
 
 
     if infile == ""{fatal!("Error: no input file specified.")}
-    let mut document = Document {vars: std_vars(), files: vec![default_docinfo(infile.clone(), &format)], format: format};
+    let mut document = Document {vars: standard_variables::std_vars(), files: vec![default_docinfo(infile.clone(), &format)], format: format};
     document.files[0].outfilename = outfile;
 
     let file_content = logic::read_file(&infile);

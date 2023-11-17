@@ -1,16 +1,11 @@
-use std::fs;
-use std::process::Command;
-use crate::DocInfo;
-use crate::Document;
-use crate::default_docinfo;
 extern crate termion;
 use crate::*;
 
 
 pub fn read_file(filename:&String) -> String{
-    let data = fs::read_to_string(filename).unwrap_or_else(|_error|{
+    let data = std::fs::read_to_string(filename).unwrap_or_else(|_error|{
         warn!(format!("Warning: unable to read file with name \"{}\"", filename));
-        return "\nFILE SYSTEM ERROR\n".to_string();
+        return "\n{mark:FILE SYSTEM ERROR}\n".to_string();
     });
     return data.to_string();
 }
@@ -35,7 +30,11 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
     pos+=1;
     let chars:Vec<char> = text.chars().collect();
     let mut var_name = String::new();
-    while pos < chars.len() && !"\n \t".contains(chars[pos]){ // get name of the var
+    while pos < chars.len() && !";".contains(chars[pos]){ // get name of the var
+        if "\t\r\n ".contains(chars[pos]){
+            warn!(format!("warning: variable contains whitespace on line {}. Did you forget a semicolon?", lines_to_pos(&chars, pos)));
+            return ("{mark:ERROR; VAR UNDEFINED}".to_string(), pos);
+        }
         var_name.push(chars[pos]);
         pos+=1;
     }
@@ -47,7 +46,7 @@ fn get_var(text: &String, vars: &Vec<Vec<String>>, mut pos: usize) -> (String, u
         }
     }
     warn!(format!("Warning: variable \"{}\" (on line {}) is unknown.\nMake sure you terminated the variable with whitespace(which will NOT be written to the output),\nand that you didn't put whitespace within or immediately after the variable decleration.", var_name, lines_to_pos(&chars, pos)));
-    return (String::from("(ERROR; VAR NOT FOUND)"), pos);
+    return (String::from("{mark:ERROR; VAR NOT FOUND}"), pos);
 }
 
 fn setnewdocinf(filename: &String, docinf: DocInfo, mut document: Document) -> Document{
@@ -74,33 +73,19 @@ fn is_parsed_file(document: &Document, filename: &String) -> bool{
 
 //run a function.
 fn exec_fn(function: &String, text: &String, maintext:&Vec<char>, pos:usize) -> String{
-    return String::from_utf8_lossy(&Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().unwrap_or_else(|_error|{
+    return String::from_utf8_lossy(&std::process::Command::new("/lib/flaarc/".to_owned() + function).arg(text).output().unwrap_or_else(|_error|{
         warn!(format!("Warning: function \"{}\" on line {} failed to execute", function, lines_to_pos(maintext, pos)));
-        return Command::new("echo").arg("ERROR: FN FAILED TO EXECUTE").output().unwrap();
+        return std::process::Command::new("echo").arg("{mark:ERROR: FN FAILED TO EXECUTE}").output().unwrap();
     }).stdout).to_string();
 }
 
-fn getdpos(document: &Document, filename: &String) -> usize{
-    let mut x = 0;
-    while x < document.files.len(){
-        if &document.files[x].filename == filename{
-            return x;
-        }
-        x+=1;
-    }
-    return 0;
-
-}
-
-// This is the Logical Parser. It's a seperate entity from the Formatting Parser due to technical
-// reasons. It's job is to take in text and find:
+// This is the Logical Parser. It's job is to take in text and find:
 // variable definitions
 // variables
 // functions &
 // include statements
 //
-// Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does
-// formatting.
+// Then process them BEFORE the formatting parser ever sees it; The formatting parser ONLY does formatting.
 pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo, keep_dollar: bool) -> (String, Document, DocInfo){
     debug!(format!("NEWITER: {}", text));
     let chars:Vec<char> = text.chars().collect();
@@ -136,14 +121,14 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                 while pos < chars.len() && chars[pos] != '\n'{ pos+=1 }
                 continue;
             }
-            while !" \t\n".contains(chars[pos]) { action.push(chars[pos]); pos+=1 }   // find the action
+            while pos < chars.len() && !" \t\n".contains(chars[pos]) { action.push(chars[pos]); pos+=1 }   // find the action
             if action == "break"{
                 output+="#break\n";
                 while pos < chars.len() && chars[pos] != '\n'{ pos+=1 }
                 continue;
             }
-            while " \t".contains(chars[pos]) { pos+=1 }                             //skip whitespace.
-            while chars[pos] != '\n'{ data.push(chars[pos]); pos+=1 }               // get the data
+            while pos < chars.len() && " \t".contains(chars[pos]) { pos+=1 }                             //skip whitespace.
+            while pos < chars.len() && chars[pos] != '\n'{ data.push(chars[pos]); pos+=1 }               // get the data
             
             match action.as_str(){ 
                 "define" | "set" | "let" => {
@@ -228,7 +213,7 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
             }
             debug!(format!("fn: {}", function));
             pos +=1;
-            if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table" || function == "filelink"{
+            if function == "sub" || function == "center" || function == "right" || function == "list" || function == "link" || function == "mark" || function == "table" || function == "filelink" || function == "sqrt"{
                 output+="{";
                 pos = prevpos+1;
                 debug!(format!("skfn: {}", function));
@@ -301,8 +286,10 @@ pub fn logical_parser(text: &String, mut document: Document, mut docinf: DocInfo
                         pos+=1;
                     }
                     else if chars[pos] == '}'{
-                        input+="}";
                         depth-=1;
+                        if depth > 0{
+                            input+="}"
+                        }
                         pos+=1;
                     }
                     else{

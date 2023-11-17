@@ -41,7 +41,7 @@ int main(int argc, char **argv){
 	}
 
 
-	printf("<!DOCTYPE html><html><style>table, th, td {border: 1px solid black; border-collapse: collapse;padding:5px;}</style><head><title>%s</title></head><body><h1>%s</h1>", title, title);
+	printf("\\documentclass{article}\n\\title{%s}\n\\usepackage{xcolor}\n\\usepackage{soul}\n\\usepackage{hyperref}\n\\begin{document}\n\t\\maketitle\n", title, title);
 	pointer = 0;
 	char* text = argv[2];
 	char operation[100] = ""; // no operation will be longer than 100 chars.
@@ -53,11 +53,15 @@ int main(int argc, char **argv){
 
 	while (text[pointer] != 0){
                 if (text[pointer] == '\n'){printf("<br>");}
-                else if (text[pointer] == '\''){printf("&apos;");}
-                else if (text[pointer] == '"'){printf("&quot;");}
-                else if (text[pointer] == '<'){printf("&lt;");}
-                else if (text[pointer] == '>'){printf("&gt;");}
-                else if (text[pointer] == '&'){printf("&amp;");}
+                else if (text[pointer] == '&'){printf("\\&");}
+                else if (text[pointer] == '%'){printf("\\%%");}
+                else if (text[pointer] == '$'){printf("\\$");}
+                else if (text[pointer] == '#'){printf("\\#");}
+                else if (text[pointer] == '_'){printf("\\_");}
+                else if (text[pointer] == '{'){printf("\\{");}
+                else if (text[pointer] == '}'){printf("\\}");}
+                else if (text[pointer] == '~'){printf("\\textasciitilde");}
+                else if (text[pointer] == '^'){printf("\\textasciicircum");}
 		else if (text[pointer] == '\\'){
 			pointer++;
 			if (text[pointer] != '\\'){
@@ -67,28 +71,28 @@ int main(int argc, char **argv){
 				operation[operation_pointer] = 0;
 				operation_pointer = 0;
 				if (strcmp("StartBold", operation) == 0){
-					printf("<strong>");
+					printf("\\textbf{");
 				}
 				if (strcmp("EndBold",operation)==0){
-					printf("</strong>");
+					printf("}");
 				}
 				else if (strcmp("StartItalic", operation) == 0){
-                                        printf("<em>");
+                                        printf("\\textit{");
                                 }
 				else if (strcmp("EndItalic", operation) == 0){
-					printf("</em>");
+					printf("}");
 				}
 				else if (strcmp("StartList", operation) == 0){
-					printf("<ul>");
+					printf("\n\\begin{itemize%d}", list_depth++);
 				}
 				else if (strcmp("EndList", operation) == 0){
-					printf("</ul>");
+					printf("\n\\end{itemize%d}", list_depth--);
 				}
 				else if (strcmp("StartListItem", operation) == 0){
-					printf("<li>");
+					printf("\n\\item ");
 				}
 				else if (strcmp("EndListItem", operation) == 0){
-					printf("</li>");
+					printf("");
 				}
 				else if (strcmp("StartLink", operation) == 0){
 					pointer++;
@@ -97,37 +101,40 @@ int main(int argc, char **argv){
 					}
 					current_link[current_link_pos] = 0;
 					current_link_pos = 0;
-					printf("<a href=\"%s\">", current_link);
+					printf("\\href{%s}{", current_link);
 				}
 				else if (strcmp("EndLink", operation) == 0){
-					printf("</a>");
+					printf("}");
 				}
 				else if (strcmp("Section",operation) == 0){
-					printf("<h2>");
+					printf("\n\\section{Section}\n");
 				}
 				else if (strcmp("EndSection", operation) == 0){
-					printf("</h2>");
+					printf("");
 				}
                                 else if (strcmp("SubSection",operation) == 0){
-                                        printf("<h3>");
+                                        printf("\n\\subsection{SubSection}\n");
                                 }
                                 else if (strcmp("EndSubSection", operation) == 0){
-                                        printf("</h3>");
+                                        printf("");
                                 }
 				else if (strcmp("StartImage", operation) == 0){
-					printf("<img src=\"");
+					printf("\n\\begin{figure}\n\\includegraphics[width=\\linewidth]{");
 				}
 				else if (strcmp("EndImage", operation) == 0){
-					printf("\">");
+					printf("}\n\\end{figure}\n");
 				}
 				else if (strcmp("StartRight", operation) == 0){
-					printf("<div style=\"text-align: right\">");
+					printf("\n\\begin{flushright}\n");
 				}
 				else if (strcmp("StartCenter", operation) == 0){
-					printf("<div style=\"text-align: right\">");
+					printf("\n\\begin{center}\n");
 				}
-				else if (strcmp("EndRight", operation) == 0 || strcmp("EndCenter", operation) == 0){
-					printf("</div>");
+				else if (strcmp("EndRight", operation) == 0){
+					printf("\n\\end{flushright}");
+				}
+				else if (strcmp("EndCenter", operation) == 0){
+					printf("\n\\end{center}\n");
 				}
 				else if (strcmp("StartTable", operation) == 0){
 					printf("<table>");
@@ -147,26 +154,26 @@ int main(int argc, char **argv){
 				else if (strcmp("EndTableItem", operation) == 0){
 					printf("</td>");
 				}
-				else if (strcmp("Startmark", operation) == 0){printf("<mark>");}
-				else if (strcmp("EndMark", operation) == 0){printf("</mark>");}
-				else if (strcmp("StartSuperscript", operation) == 0){printf("<sup>");}
-				else if (strcmp("EndSuperscript", operation) == 0){printf("</sup>");}
-				else if (strcmp("StartSubscript", operation) == 0){printf("<sub>");}
-				else if (strcmp("EndSubscript", operation) == 0){printf("</sub>");}
-				else if (strcmp("StartQuote", operation) == 0){printf("<blockquote>");}
-				else if (strcmp("EndQuote", operation) == 0){printf("</blockquote>");}
-				else if (strcmp("StartStrike", operation) == 0){printf("<del>");}
-				else if (strcmp("EndStrike", operation) == 0){printf("</del>");}
-				else if (strcmp("Break", operation) == 0){printf("<div style=\"page-break-before:always\"</div>");}
-				else if (strcmp("StartSquareRoot", operation) == 0){printf("√<span style=\"border-top:1px solid black\">");}
-				else if (strcmp("EndSquareRoot", operation) == 0){printf("</span>");}
+				else if (strcmp("Startmark", operation) == 0){printf("\\hl{");}
+				else if (strcmp("EndMark", operation) == 0){printf("}");}
+				else if (strcmp("StartSuperscript", operation) == 0){printf("^{");}
+				else if (strcmp("EndSuperscript", operation) == 0){printf("}");}
+				else if (strcmp("StartSubscript", operation) == 0){printf("_{");}
+				else if (strcmp("EndSubscript", operation) == 0){printf("}");}
+				else if (strcmp("StartQuote", operation) == 0){printf("");}
+				else if (strcmp("EndQuote", operation) == 0){printf("");}
+				else if (strcmp("StartStrike", operation) == 0){printf("\\st{");}
+				else if (strcmp("EndStrike", operation) == 0){printf("}");}
+				else if (strcmp("Break", operation) == 0){printf("\n\\newpage\n");}
+				else if (strcmp("StartSquareRoot", operation) == 0){printf("\\sqrt{");}
+				else if (strcmp("EndSquareRoot", operation) == 0){printf("}");}
 			}
-			else{printf("\\\\");}
+			else{printf("\\textasciicircum");}
 		}
 		else{printf("%c", text[pointer]);}
 		pointer++;
 
 	}
-	printf("</body></html>");
+	printf("\\end{document}");
 
 }

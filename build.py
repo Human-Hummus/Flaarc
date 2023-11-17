@@ -5,7 +5,7 @@ import sys
 false = False
 true = True
 
-normal_cc = "clang"
+normal_cc = "gcc"
 fast_cc = "tcc"
 normal_cflags = ["-Ofast", "-march=native", "-mtune=native", "-s"]
 fast_cflags = ["-O0"]
@@ -22,12 +22,17 @@ functions = [
     ["if equal.c",  ["if equal"]],
     ["lower.c",     ["lower", "lowercase", "to lowercase"]],
     ["upper.c",     ["upper", "uppercase", "to uppercase"]],
+    ["p.c",         ["p"]],
     ["length.c",    ["length", "len"]],
+    ["sum.c",       ["add", "sum"]],
+    ["math.c", ["math"]]
     ]
 outputs = [
     ["markdown.c", ["md", "MD", "markdown"]],
     ["html.c", ["html", "HTML", "web"]],
-    ["plaintext.c", ["text", "plain text", "plaintext", "txt"]]
+    ["plaintext.c", ["text", "plain text", "plaintext", "txt"]],
+    ["latex.c", ["latex"]],
+    ["ir.c", ["IR", "ir", "intermediate"]],
     ]
 
 cflags = normal_cflags
@@ -62,20 +67,34 @@ if install:
     print("creating flaarc dir")
     subprocess.run(["mkdir", '-p', '/lib/flaarc/outputs'])
 
+    tmp_file = "/tmp/kjhgfcvnk76trfbnmnbvfdewasdfghjiuytfdr45rtgbnm"
+    print(f"temporary file is \"{tmp_file}\"")
     print("building functions")
     for func in functions:
-        ffile = "standard_functions/" + func[0]
+        infile = func[0]
+        ffile = "standard_functions/" + infile
+        print(f"\tbuilding function {infile} with {cflags} & {cc}")
+        subprocess.run([cc] + cflags + [ffile, '-o', tmp_file])
         for outfile in func[1]:
             of = "/lib/flaarc/" + outfile
-            print(f"building {of} from {ffile} with flags {cflags} with cc {cc}")
-            subprocess.run([cc] + cflags + [ffile, '-o', of])
+            print(f"\t\tcopying {of} from temporary file.")
+            subprocess.run(["cp", tmp_file, of])
+        print("\t\tdeleting temporary file")
+        subprocess.run(["rm", tmp_file])
     print("building outputs")
     for op in outputs:
-        ffile = "outputs/" + op[0]
+        infile = op[0]
+        ffile = "outputs/" + infile
+        print(f"\tbuilding output {infile} with {cflags} & {cc}")
+        subprocess.run([cc] + cflags + [ffile, '-o', tmp_file])
         for outfile in op[1]:
             of = "/lib/flaarc/outputs/" + outfile
-            print(f"building {of} from {ffile} with flags {cflags} with cc {cc}")
-            subprocess.run([cc] + cflags + [ffile, '-o', of])
+            print(f"\t\tcopying {of} from temporary file")
+            subprocess.run(["cp", tmp_file, of])
+        print(f"\t\tdeleting temporary file")
+        subprocess.run(["rm", tmp_file])
+
+
     print("building flaarc")
     if cc != normal_cc:
         subprocess.run(["cargo", "build"])

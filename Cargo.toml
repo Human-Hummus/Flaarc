@@ -1,4 +1,4 @@
-cargo-features = ["profile-rustflags"]
+#cargo-features = ["profile-rustflags"]
 [package]
 name = "flaarc"
 version = "0.1.1"
@@ -12,5 +12,5 @@ termion = "*"
 
 [profile.release]
 lto = true
-rustflags = ["-C", "target-cpu=native"]
+#rustflags = ["-C", "target-cpu=native"]
 codegen-units = 1

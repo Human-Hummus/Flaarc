@@ -1,6 +1,3 @@
-use std::fs;
-use crate::DocInfo;
-use std::fmt::format;
 use crate::Document;
 use crate::*;
 use std::process::Command;
@@ -9,7 +6,7 @@ use std::io::Write;
 const OUTPUT_DIRECTORY:&str = "/lib/flaarc/outputs/"; //directory to search for executables to use to make the output
 
 
-fn run_output(vars: &Vec<Vec<String>>, IR: &String, output:&String) -> String{
+fn run_output(vars: &Vec<Vec<String>>, ir: &String, output:&String) -> String{
     let mut arg1 = String::new();
     for var in vars{
         let mut toadd:String = String::from(var[0].clone()) + ":";
@@ -27,7 +24,7 @@ fn run_output(vars: &Vec<Vec<String>>, IR: &String, output:&String) -> String{
     }
     return String::from_utf8_lossy(&Command::new(OUTPUT_DIRECTORY.to_owned() + output)
                                    .arg(arg1)
-                                   .arg(IR)
+                                   .arg(ir)
                                    .output()
                                    .unwrap_or_else(|_error|{
                                         fatal!(format!("fatal error: unable to execute {output}; the output."))
@@ -56,15 +53,39 @@ pub fn get_outfname(document: &Document, filename: &String) -> usize{
     return 0; // upon failure, return the index page.
 }
 
+fn lines_to_pos(text: &Vec<char>, pos: usize) -> usize{
+    let mut line_number = 1;
+    let mut x = 0;
+    while x < text.len() && x != pos{
+        if text[x] == '\n'{
+            line_number+=1;
+        }
+        x+=1;
+    }
+    return line_number;
+}
 
-//parses the... format; generate IR in order to make it easier to parse later to generate HTML, md, etc.
+#[derive(PartialEq)]
+enum DepthType{
+    List,
+    URL,
+    AlignCenter,
+    AlignRight,
+    Highlight,
+    Table,
+    SubScript,
+    SquareRoot
+}
+
+
+//parses the... format; generate ir in order to make it easier to parse later to generate HTML, md, etc.
 pub fn format_parser(input: &String, doc:&Document) -> String{
     debug!(format!("format parser input: {}", input));
     let mut output = String::new();
     let chars:Vec<char> = input.chars().collect();
     let mut pos = 0;
     
-    let mut depthinfo:Vec<char> = vec![];
+    let mut depthinfo:Vec<DepthType> = vec![];
     let mut is_bold = false;
     let mut is_italic = false;
     let mut is_superscript = false;
@@ -73,7 +94,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
     let mut is_crossout = false;
 
     while pos < chars.len(){
-        if depthinfo.contains(&'t') && chars[pos] != ' ' && chars[pos] != '\t'{
+        if depthinfo.contains(&DepthType::Table) && chars[pos] != ' ' && chars[pos] != '\t'{
             if !is_table_row{
                 flip_bool!(is_table_row);
                 output+="\\StartTableRow\\";
@@ -144,7 +165,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
                         if !" \n\t".contains(chars[x]) { output+="\\StartListItem\\"; break }
                         x+=1;
                     }
-                    depthinfo.push('l');//l is for link
+                    depthinfo.push(DepthType::List)
                 }
                 "filelink" => {
                     let mut filename = String::new();
@@ -171,78 +192,85 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
                     }
                     output+= &format!("\\StartLink\\{}|", link_address.clone());
         
-                    if chars[pos] != '}'{ depthinfo.push('u') } //U is for Url.
+                    if chars[pos] != '}'{ depthinfo.push(DepthType::URL) }
                     else{ output+= &format!("{}\\EndLink\\", link_address); }
                     pos+=1;
                 }
 
                 "center" => {
                     output+="\\StartCenter\\";
-                    depthinfo.push('c') //c for center
+                    depthinfo.push(DepthType::AlignCenter)
                 }
 
                 "right" => {
                     output+="\\StartRight\\";
-                    depthinfo.push('r'); //r for right align.
+                    depthinfo.push(DepthType::AlignRight) 
                 }
                 "mark" => {
                     output+="\\Startmark\\";
-                    depthinfo.push('h'); //h is for highlight.
+                    depthinfo.push(DepthType::Highlight)
                 }
                 "table" => {
                     output+="\\StartTable\\";
-                    depthinfo.push('t'); //t for table
+                    depthinfo.push(DepthType::Table)
                 }
                 "sub" => {
                     output+="\\StartSubscript\\";
-                    depthinfo.push('s'); //s for subscript
+                    depthinfo.push(DepthType::SubScript)
+                }
+                "sqrt" => {
+                    output+="\\StartSquareRoot\\";
+                    depthinfo.push(DepthType::SquareRoot)
                 }
 
-                _ => { pos+=1; } //oof
+                _ => { pos+=1; } //just in case
             }
 
 
         }
         else if chars[pos] == '}'{
-            if !(depthinfo.len() > 0){
-                warn!("warning: unhandled \"}}\"");
+            if depthinfo.len() < 1{
+                warn!(format!("warning: unhandled \"}}\" on line {}(pos {})", lines_to_pos(&chars, pos), pos));
                 pos+=1;
                 continue;
             }
-            let terminated:char = depthinfo.pop().unwrap();
+            let terminated = depthinfo.pop().unwrap();
             match terminated{
-                'l' => {output+="\\EndList\\";}     //list
-                'u' => {output+="\\EndLink\\";}     //urls
-                'c' => {output+="\\EndCenter\\";}   //center
-                'r' => {output+="\\EndRight\\";}    //right align
-                'h' => {output+="\\EndMark\\";}     //highlight
-                't' => {                            //table
-                    if is_table_item{
-                        flip_bool!(is_table_item);
-                        output+="\\EndTableItem\\"}
-                    if is_table_row{
-                        flip_bool!(is_table_row);
-                        output+="\\EndTableRow\\"}
-                    output+="\\EndTable\\";}
-                's' => {output+="\\EndSubscript\\"} //subscript   
+                DepthType::List         => {output+="\\EndList\\";}     
+                DepthType::URL          => {output+="\\EndLink\\";}     
+                DepthType::AlignCenter  => {output+="\\EndCenter\\";}   
+                DepthType::AlignRight   => {output+="\\EndRight\\";}    
+                DepthType::Highlight    => {output+="\\EndMark\\";}     
+                DepthType::Table        => {                            
+                                            if is_table_item{
+                                                flip_bool!(is_table_item);
+                                                output+="\\EndTableItem\\"}
+                                            if is_table_row{
+                                                flip_bool!(is_table_row);
+                                                output+="\\EndTableRow\\"}
+                                            output+="\\EndTable\\";}
+                DepthType::SubScript    => {output+="\\EndSubscript\\"} 
+                DepthType::SquareRoot   => {output+="\\EndSquareRoot\\"}
 
-                _ => {}//somethings wrong
             }
             pos+=1;
         }
         else if chars[pos] == '\n'{
-            if depthinfo.contains(&'l'){
+            if depthinfo.contains(&DepthType::List){
                 output+="\\EndListItem\\";
                 let mut temp_pos = pos+1;
-                while chars[temp_pos] != '}'{
+                while temp_pos < chars.len() && chars[temp_pos] != '}'{
                     if !" \n\t".contains(chars[temp_pos]){
                         output+="\\StartListItem\\";
                         break;
                     }
                     temp_pos+=1;
                 }
+                if !(temp_pos < chars.len()){
+                    warn!(format!("Warning: List is unterminated on line {}", lines_to_pos(&chars, pos)));
+                }
             }
-            else if depthinfo.contains(&'t'){
+            else if depthinfo.contains(&DepthType::Table){
                 if is_table_item{
                     flip_bool!(is_table_item);
                     output+="\\EndTableItem\\";
@@ -285,7 +313,7 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
             pos+=1;
         }
 
-        else if chars[pos] == '|' && depthinfo.contains(&'t'){
+        else if chars[pos] == '|' && depthinfo.contains(&DepthType::Table){
             if is_table_item{
                 flip_bool!(is_table_item);
                 output+="\\EndTableItem\\";
@@ -309,11 +337,11 @@ pub fn format_parser(input: &String, doc:&Document) -> String{
     return output;
 }
 
-pub fn output_file(output_type:&String, output_file:&String, IR:&String, vars:&Vec<Vec<String>>){
+pub fn output_file(output_type:&String, output_file:&String, ir:&String, vars:&Vec<Vec<String>>){
     std::fs::File::create(output_file)
         .unwrap_or_else(|_|{fatal!(format!("fatal error: unable to open/create file \"{output_file}\""))})
         .write_all(
-                run_output(vars, IR, output_type).as_bytes()
+                run_output(vars, ir, output_type).as_bytes()
             )
         .unwrap_or_else(|_|{fatal!(format!("fatal error: unable to open/create file \"{output_file}\""))});
 }
